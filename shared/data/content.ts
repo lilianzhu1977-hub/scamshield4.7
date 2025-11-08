@@ -108,27 +108,27 @@ export const quizQuestions = [
     },
     options: [
       {
-        en: "Transfer the money immediately",
-        zh: "立即转账",
-        ms: "Pindahkan wang dengan segera"
-      },
-      {
-        en: "Hang up and call the police using their official number",
-        zh: "挂断电话并用官方号码回拨警察局",
-        ms: "Tutup telefon dan hubungi polis menggunakan nombor rasmi"
-      },
-      {
         en: "Give them your bank details",
         zh: "提供你的银行详情",
         ms: "Berikan butiran bank anda"
       },
       {
+        en: "Transfer the money immediately",
+        zh: "立即转账",
+        ms: "Pindahkan wang dengan segera"
+      },
+      {
         en: "Ask them to call back later",
         zh: "请他们稍后再打",
         ms: "Minta mereka hubungi semula nanti"
+      },
+      {
+        en: "Hang up and call the police using their official number",
+        zh: "挂断电话并用官方号码回拨警察局",
+        ms: "Tutup telefon dan hubungi polis menggunakan nombor rasmi"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 3,
     explanation: {
       en: "Never transfer money or give personal details over the phone, even if the caller claims to be from the police. Always hang up and call back using official numbers.",
       zh: "绝不要通过电话转账或提供个人信息，即使对方声称是警察。应该挂断电话并用官方号码回拨。",
@@ -180,14 +180,14 @@ export const quizQuestions = [
     },
     options: [
       {
-        en: "Send money immediately to help",
-        zh: "立即汇款帮助朋友",
-        ms: "Hantar wang segera untuk bantu kawan"
-      },
-      {
         en: "Refuse and consider it might be a scam",
         zh: "拒绝并考虑这可能是诈骗",
         ms: "Tolak dan anggap ia mungkin penipuan"
+      },
+      {
+        en: "Send money immediately to help",
+        zh: "立即汇款帮助朋友",
+        ms: "Hantar wang segera untuk bantu kawan"
       },
       {
         en: "Send a small amount first to test",
@@ -200,7 +200,7 @@ export const quizQuestions = [
         ms: "Minta mereka tunjuk pengenalan diri"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 0,
     explanation: {
       en: "Never send money to online friends you've never met in person. This is a classic romance or friendship scam.",
       zh: "永远不要给从未见过面的网友汇款。这是典型的浪漫诈骗或友情诈骗。",
@@ -216,14 +216,9 @@ export const quizQuestions = [
     },
     options: [
       {
-        en: "Let them access your computer",
-        zh: "让他们访问你的电脑",
-        ms: "Biarkan mereka akses komputer anda"
-      },
-      {
-        en: "Hang up immediately - it's a tech support scam",
-        zh: "立即挂断 - 这是技术支持诈骗",
-        ms: "Tutup telefon segera - ini penipuan sokongan teknikal"
+        en: "Download the software they recommend",
+        zh: "下载他们推荐的软件",
+        ms: "Muat turun perisian yang mereka cadangkan"
       },
       {
         en: "Pay them to fix the virus",
@@ -231,12 +226,17 @@ export const quizQuestions = [
         ms: "Bayar mereka untuk baiki virus"
       },
       {
-        en: "Download the software they recommend",
-        zh: "下载他们推荐的软件",
-        ms: "Muat turun perisian yang mereka cadangkan"
+        en: "Hang up immediately - it's a tech support scam",
+        zh: "立即挂断 - 这是技术支持诈骗",
+        ms: "Tutup telefon segera - ini penipuan sokongan teknikal"
+      },
+      {
+        en: "Let them access your computer",
+        zh: "让他们访问你的电脑",
+        ms: "Biarkan mereka akses komputer anda"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 2,
     explanation: {
       en: "This is a classic tech support scam. Real tech companies don't call you unsolicited. Never give remote access to strangers.",
       zh: "这是典型的技术支持诈骗。真正的科技公司不会主动打电话给你。永远不要让陌生人远程访问。",
@@ -288,14 +288,14 @@ export const quizQuestions = [
     },
     options: [
       {
+        en: "Ask for their employee ID first",
+        zh: "先询问他们的员工编号",
+        ms: "Tanya ID pekerja mereka dahulu"
+      },
+      {
         en: "Provide the OTP immediately",
         zh: "立即提供验证码",
         ms: "Berikan OTP segera"
-      },
-      {
-        en: "Hang up - banks never ask for OTPs over the phone",
-        zh: "挂断电话 - 银行绝不会通过电话要求验证码",
-        ms: "Tutup telefon - bank tidak akan minta OTP melalui telefon"
       },
       {
         en: "Read only the first 3 digits",
@@ -303,12 +303,12 @@ export const quizQuestions = [
         ms: "Baca hanya 3 digit pertama"
       },
       {
-        en: "Ask for their employee ID first",
-        zh: "先询问他们的员工编号",
-        ms: "Tanya ID pekerja mereka dahulu"
+        en: "Hang up - banks never ask for OTPs over the phone",
+        zh: "挂断电话 - 银行绝不会通过电话要求验证码",
+        ms: "Tutup telefon - bank tidak akan minta OTP melalui telefon"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 3,
     explanation: {
       en: "Banks and legitimate institutions NEVER ask for your OTP. Anyone asking for it is trying to scam you. OTPs are for your eyes only.",
       zh: "银行和合法机构绝不会要求您的验证码。任何索要验证码的人都在试图诈骗你。验证码仅供你自己使用。",
@@ -324,9 +324,9 @@ export const quizQuestions = [
     },
     options: [
       {
-        en: "Yes, to claim my prize",
-        zh: "是的，为了领取奖金",
-        ms: "Ya, untuk tuntut hadiah saya"
+        en: "Ask them to mail a cheque instead",
+        zh: "要求他们邮寄支票",
+        ms: "Minta mereka pos cek sahaja"
       },
       {
         en: "No - you can't win a lottery you didn't enter",
@@ -334,14 +334,14 @@ export const quizQuestions = [
         ms: "Tidak - anda tidak boleh menang loteri yang tidak disertai"
       },
       {
+        en: "Yes, to claim my prize",
+        zh: "是的，为了领取奖金",
+        ms: "Ya, untuk tuntut hadiah saya"
+      },
+      {
         en: "Provide only partial bank details",
         zh: "只提供部分银行信息",
         ms: "Berikan hanya sebahagian butiran bank"
-      },
-      {
-        en: "Ask them to mail a cheque instead",
-        zh: "要求他们邮寄支票",
-        ms: "Minta mereka pos cek sahaja"
       }
     ],
     correctIndex: 1,
@@ -360,6 +360,11 @@ export const quizQuestions = [
     },
     options: [
       {
+        en: "Buy one item first to test",
+        zh: "先买一件试试",
+        ms: "Beli satu item dahulu untuk uji"
+      },
+      {
         en: "Yes, it's a great deal",
         zh: "是的，这是很好的交易",
         ms: "Ya, ini tawaran hebat"
@@ -370,17 +375,12 @@ export const quizQuestions = [
         ms: "Tidak - tawaran terlalu baik biasanya penipuan"
       },
       {
-        en: "Buy one item first to test",
-        zh: "先买一件试试",
-        ms: "Beli satu item dahulu untuk uji"
-      },
-      {
         en: "Ask for cash on delivery",
         zh: "要求货到付款",
         ms: "Minta bayar semasa penghantaran"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 2,
     explanation: {
       en: "Extreme discounts + bank transfer only + pressure to buy immediately = scam. Use secure payment methods and verified sellers only.",
       zh: "极端折扣 + 只接受银行转账 + 催促立即购买 = 诈骗。只使用安全的支付方式和经过验证的卖家。",
@@ -396,6 +396,11 @@ export const quizQuestions = [
     },
     options: [
       {
+        en: "Delete the unknown apps",
+        zh: "删除未知应用",
+        ms: "Padam aplikasi tidak dikenali"
+      },
+      {
         en: "Continue using the phone normally",
         zh: "继续正常使用手机",
         ms: "Teruskan guna telefon seperti biasa"
@@ -406,17 +411,12 @@ export const quizQuestions = [
         ms: "Hidupkan mod pesawat dan dapatkan bantuan profesional"
       },
       {
-        en: "Delete the unknown apps",
-        zh: "删除未知应用",
-        ms: "Padam aplikasi tidak dikenali"
-      },
-      {
         en: "Change your phone password",
         zh: "更改手机密码",
         ms: "Tukar kata laluan telefon"
       }
     ],
-    correctIndex: 1,
+    correctIndex: 2,
     explanation: {
       en: "Your phone may be compromised. Turn on airplane mode immediately to stop remote access, then take it to an authorized service center.",
       zh: "你的手机可能已被入侵。立即开启飞行模式以阻止远程访问，然后送到授权服务中心。",
