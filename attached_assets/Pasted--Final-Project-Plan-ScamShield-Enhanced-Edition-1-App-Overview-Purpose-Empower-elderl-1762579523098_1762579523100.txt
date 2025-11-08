@@ -1,0 +1,39 @@
+🚀 Final Project Plan — ScamShield+ 守骗者 (Enhanced Edition) 
+1. App Overview Purpose: Empower elderly users in Singapore to recognize, resist, and 
+report scams through a multilingual, audio-narrated, touch-friendly web app. 
+Core Features: No saved data — resets after each session Language selection at startup (English / 中文 
+/ Malay) 
+Seven educational modules: Learn, Videos, Simulation, Quiz, HelpLines, Tips, Scam News Elderly-first 
+design: large buttons, narration, high contrast, slow animations 
+Built-in assistant: 阿信小助手 (A-Xin) for simple Q&A 2. 
+Language Selection Startup pop-up: Choose English / 中文 / Malay Audio cue for each language option 
+(for non-readers) 
+All UI text, narration, and content switch to selected language Session resets on refresh — 
+no data stored 3. Home Page Large, friendly buttons with icons and audio labels 
+Seven main modules: Learn 📚 Videos 🎥 Simulation 模拟体验 Quiz 🎯 Help Lines ☎️ Tips 💡 Scam News 📰 
+Top-right accessibility bar: 🔊 Narration toggle (on/off) 🌗 Font size toggle 
+(normal / large) 🎨 High contrast toggle 🐢 Slow animation toggle (on/off) 
+4. Learn Page Cards for core scam types (EN / CN / MY placeholders): Government impersonation 
+Fake friend/family call E-commerce / delivery scam Love / romance scam Investment / 
+get-rich-quick scam Money mule / account misuse Each card includes: Title (EN / CN / MY) 
+Short example story “Play Voice / 播放语音 / Main Suara” button Image  “Learn more” 
+expandable section 5. Videos Page Short clips (30–90s) with subtitles and narration Topics: Common 
+scam types How scammers trick victims ACT guidance (Ask / Check / Tell) Each video includes: Title + 
+summary (EN / CN / MY) Subtitles in all 3 languages Play button with audio narration  
+video file/URL 6. Simulation — “A Day in the Scammer’s Screen” Purpose: Help users understand how 
+scammers think — safely and ethically. Format: Interactive animation (mock phone UI) 
+Step-by-step panels with: Simple sentence (EN / CN / MY) Safe visual (blurred/mock) 
+“Learn why this is risky” button Narration for each panel End screen: “Here’s how to stop them” 
+→ links to Tips & HelpLines Replay / Start Over button Scenario Flow: 
+Scammer gets victim’s number Sends fake message (“Your account needs verification”) 
+Tricks victim into clicking link or installing app Shows mock “scammer view” 
+(blurred contacts, fake bank app icon) Uses social engineering (pretends to be family/bank) 
+Tries to get OTP or money Ends with prevention tips Learning Goals: Recognize red flags: 
+fake apps, pop-ups, OTP requests Understand social engineering tactics Know what to do immediately 
+7. Quiz Page 10 randomized multiple-choice questions Each question: EN / CN / MY text + options 
+Immediate feedback with teaching text Results screen: 0–4: Beginner 5–7: Scam Fighter 8–10: 
+Scam Guardian 🎉 Certificate screen with “Share your result” button (WhatsApp / SMS) 8. Help 
+Lines Page Large one-tap call buttons: 999 — Police (emergency) 1800-722-6688 — Anti-Scam Helpline 
+Quick checklist: “If your phone is controlled right now” “Share this” button: Send info to caregiver 
+via WhatsApp Link to official ScamShield resources 9. Tips Page — What To Do A. If You Suspect Remote 
+Control Each step is a big card with: Icon One-line summary (EN / CN / MY) Narration button Steps: Disconnect from internet (Airplane mode) Power off phone Don’t enter passwords or OTPs Call trusted family (use another phone) Contact your bank (use official number) Report to police / anti-scam helpline Visit authorized service center Factory reset (only if advised) B. Scam Call Tips Hang up if unsure Ask questions — but don’t call back numbers they give Never share OTPs or transfer money Verify “family in trouble” claims Write down call details C. Other Scenarios Fake delivery: Don’t click links; check official app Investment scams: Too good to be true = scam Romance scams: No money to online strangers Money mule: Never accept money for others 10. Scam News Page Static list of recent scams: Title, date, short description (EN / CN / MY) “Learn more” detail card “Last updated” date at top 11. Elderly-Friendly Chat Assistant — 阿信小助手 (A-Xin) Simple Q&A with voice input + read-aloud replies Example questions: “What is OTP?” “What if someone says they’re from the bank?” “How do I report a scam?” Empathetic tone, short answers, prevention-first 12. Accessibility & UX Large fonts, high contrast, narration toggle Slowed animations (toggle) Big touch targets, minimal scrolling All pages support narration and voice input Session resets on refresh — no personal data stored 13. Tech Plan Framework: React + Vite Styling: Tailwind CSS (accessibility-first) Routing: React Router Audio: Web Speech API (TTS + voice input) Simulation: Client-side, text-only, mock visuals Content: Static JS arrays (no localStorage) Placeholders: All content areas marked with // TODO: FILL CONTENT HERE 14. App Flow Code Language Pop-up (EN / 中文 / Malay) ↓ Home Page (7 Buttons + Accessibility) ↓ Learn | Videos | Simulation | Quiz | HelpLines | Tips | Scam News ↓ Chat Assistant available everywhere 15. Safety & Ethics Simulation is non-actionable: no real hacking, no technical steps All visuals are blurred or mock Every step includes prevention tips No data collection or tracking Designed for school and public use
