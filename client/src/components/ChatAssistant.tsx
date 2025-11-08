@@ -2,8 +2,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bot, Send, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
+import { chatbotResponses } from "@shared/data/content";
+import { getText } from "@/lib/translations";
 
 interface ChatAssistantProps {
   isOpen: boolean;
@@ -12,26 +14,48 @@ interface ChatAssistantProps {
 
 export default function ChatAssistant({ isOpen, onClose }: ChatAssistantProps) {
   const { language } = useApp();
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([
-    { role: 'assistant', text: language === 'zh' ? '你好！我是阿信小助手。有什么我可以帮你的吗？' : language === 'ms' ? 'Hello! Saya A-Xin. Apa yang boleh saya bantu?' : 'Hello! I\'m A-Xin, your scam prevention assistant. How can I help you today?' }
-  ]);
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
   const [input, setInput] = useState('');
+
+  useEffect(() => {
+    setMessages([{
+      role: 'assistant',
+      text: getText(chatbotResponses.greeting, language)
+    }]);
+  }, [language]);
+
+  const getResponse = (userInput: string): string => {
+    const lowerInput = userInput.toLowerCase();
+    
+    if (lowerInput.includes('government') || lowerInput.includes('police') || lowerInput.includes('政府') || lowerInput.includes('警察') || lowerInput.includes('kerajaan') || lowerInput.includes('polis')) {
+      return getText(chatbotResponses.government_scam, language);
+    }
+    if (lowerInput.includes('otp') || lowerInput.includes('验证码') || lowerInput.includes('code') || lowerInput.includes('password') || lowerInput.includes('kod')) {
+      return getText(chatbotResponses.otp_safety, language);
+    }
+    if (lowerInput.includes('link') || lowerInput.includes('sms') || lowerInput.includes('链接') || lowerInput.includes('短信') || lowerInput.includes('pautan') || lowerInput.includes('message')) {
+      return getText(chatbotResponses.suspicious_link, language);
+    }
+    if (lowerInput.includes('remote') || lowerInput.includes('control') || lowerInput.includes('远程') || lowerInput.includes('控制') || lowerInput.includes('kawalan') || lowerInput.includes('jauh')) {
+      return getText(chatbotResponses.remote_control, language);
+    }
+    if (lowerInput.includes('report') || lowerInput.includes('举报') || lowerInput.includes('报告') || lowerInput.includes('lapor') || lowerInput.includes('help')) {
+      return getText(chatbotResponses.report_scam, language);
+    }
+    
+    return getText(chatbotResponses.default, language);
+  };
 
   const handleSend = () => {
     if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { role: 'user', text: input }]);
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     
     setTimeout(() => {
-      const responses = language === 'zh' 
-        ? ['我明白了。请记住：政府部门永远不会通过电话要求你转账。', '这很重要。如果你怀疑是诈骗，请立即挂断电话并拨打官方热线。']
-        : language === 'ms'
-        ? ['Saya faham. Ingat: Agensi kerajaan tidak akan meminta wang melalui telefon.', 'Penting untuk diingat. Jika anda syak penipuan, tutup telefon dan hubungi talian rasmi.']
-        : ['I understand. Remember: Government agencies never ask for money over the phone.', 'That\'s important to know. If you suspect a scam, hang up and call official hotlines.'];
-      
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setMessages(prev => [...prev, { role: 'assistant', text: randomResponse }]);
-    }, 1000);
+      const response = getResponse(userMessage);
+      setMessages(prev => [...prev, { role: 'assistant', text: response }]);
+    }, 800);
 
     setInput('');
   };

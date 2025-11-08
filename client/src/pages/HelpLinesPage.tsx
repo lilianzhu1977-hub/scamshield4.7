@@ -40,10 +40,14 @@ export default function HelpLinesPage() {
       ? "Nombor penting untuk kecemasan:\n999 - Polis Kecemasan\n1800-722-6688 - Talian Anti-Penipuan"
       : "Important numbers for emergencies:\n999 - Police Emergency\n1800-722-6688 - Anti-Scam Helpline";
     
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    
     if (navigator.share) {
-      navigator.share({ text });
+      navigator.share({ text }).catch(() => {
+        window.open(whatsappUrl, '_blank');
+      });
     } else {
-      alert(text);
+      window.open(whatsappUrl, '_blank');
     }
   };
 

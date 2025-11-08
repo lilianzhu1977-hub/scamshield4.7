@@ -3,12 +3,22 @@ import { ChevronLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import ScamTypeCard from "@/components/ScamTypeCard";
 import { useApp } from "@/contexts/AppContext";
+import { scamTypes as scamTypesData } from "@shared/data/content";
+import { getText } from "@/lib/translations";
 
 export default function LearnPage() {
   const [, setLocation] = useLocation();
   const { language } = useApp();
 
-  const scamTypes = [
+  const scamTypes = scamTypesData.map(scam => ({
+    icon: scam.icon,
+    title: getText(scam.title, language),
+    description: getText(scam.description, language),
+    story: getText(scam.story, language),
+    testId: `card-scam-${scam.id}`
+  }));
+
+  const oldScamTypes = [
     {
       icon: "🏛️",
       title: language === 'zh' ? "政府假冒诈骗" : language === 'ms' ? "Penipuan Penyamaran Kerajaan" : "Government Impersonation",
@@ -65,6 +75,7 @@ export default function LearnPage() {
       testId: "card-scam-investment"
     }
   ];
+  // Using data from shared/data/content.ts instead
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

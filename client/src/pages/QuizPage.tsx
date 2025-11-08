@@ -3,8 +3,18 @@ import { Card } from "@/components/ui/card";
 import { ChevronLeft, Trophy, Share2 } from "lucide-react";
 import { useLocation } from "wouter";
 import QuizCard from "@/components/QuizCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
+import { quizQuestions as allQuestions } from "@shared/data/content";
+import { getText } from "@/lib/translations";
+
+interface QuizState {
+  shuffledQuestionIds: string[];
+  currentQuestionIndex: number;
+  score: number;
+  answeredCount: number;
+  language: string;
+}
 
 export default function QuizPage() {
   const [, setLocation] = useLocation();
@@ -13,131 +23,102 @@ export default function QuizPage() {
   const [score, setScore] = useState(0);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [shuffledQuestions, setShuffledQuestions] = useState<typeof allQuestions>([]);
 
-  const questions = language === 'zh' ? [
-    {
-      question: "接到声称是警察的电话，要求你转账到'安全账户'，你应该怎么做？",
-      options: [
-        "立即转账",
-        "挂断电话并用官方号码回拨警察局",
-        "提供你的银行详情",
-        "请他们稍后再打"
-      ],
-      correctIndex: 1,
-      explanation: "绝不要通过电话转账或提供个人信息，即使对方声称是警察。应该挂断电话并用官方号码回拨。"
-    },
-    {
-      question: "你收到一条短信说你的包裹需要额外费用，并附有一个链接。你应该？",
-      options: [
-        "点击链接立即付款",
-        "忽略短信",
-        "通过官方应用或网站查询",
-        "回复短信询问详情"
-      ],
-      correctIndex: 2,
-      explanation: "不要点击短信中的可疑链接。应该直接访问官方网站或应用来验证信息。"
-    },
-    {
-      question: "网上认识的'朋友'要求你借钱应急，你从未见过这个人。你应该？",
-      options: [
-        "立即汇款帮助朋友",
-        "拒绝并考虑这可能是诈骗",
-        "先借一小笔钱试试",
-        "要求他们提供身份证明"
-      ],
-      correctIndex: 1,
-      explanation: "永远不要给从未见过面的网友汇款。这是典型的浪漫诈骗或友情诈骗。"
+  useEffect(() => {
+    const savedStateStr = sessionStorage.getItem('scamshield-quiz-state');
+    
+    if (savedStateStr) {
+      try {
+        const savedState: QuizState = JSON.parse(savedStateStr);
+        
+        if (savedState.language === language) {
+          const questionMap = new Map(allQuestions.map(q => [q.id, q]));
+          const restoredQuestions = savedState.shuffledQuestionIds
+            .map(id => questionMap.get(id))
+            .filter((q): q is typeof allQuestions[0] => q !== undefined);
+          
+          if (restoredQuestions.length > 0) {
+            const validIndex = Math.min(savedState.currentQuestionIndex, restoredQuestions.length - 1);
+            setShuffledQuestions(restoredQuestions);
+            setCurrentQuestion(Math.max(0, validIndex));
+            setScore(savedState.score);
+            setAnsweredCount(savedState.answeredCount);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to restore quiz state:', e);
+      }
     }
-  ] : language === 'ms' ? [
-    {
-      question: "Pemanggil mendakwa dari polis dan minta anda pindahkan wang ke 'akaun selamat'. Apa yang perlu anda lakukan?",
-      options: [
-        "Pindahkan wang dengan segera",
-        "Tutup telefon dan hubungi polis menggunakan nombor rasmi",
-        "Berikan butiran bank anda",
-        "Minta mereka hubungi semula nanti"
-      ],
-      correctIndex: 1,
-      explanation: "Jangan sekali-kali pindahkan wang atau berikan maklumat peribadi melalui telefon, walaupun pemanggil mendakwa dari polis. Tutup telefon dan hubungi semula menggunakan nombor rasmi."
-    },
-    {
-      question: "Anda terima SMS bahawa pakej anda perlukan bayaran tambahan dengan pautan. Apa yang perlu anda lakukan?",
-      options: [
-        "Klik pautan untuk bayar segera",
-        "Abaikan SMS",
-        "Semak melalui aplikasi atau laman web rasmi",
-        "Balas SMS untuk tanya butiran"
-      ],
-      correctIndex: 2,
-      explanation: "Jangan klik pautan mencurigakan dalam SMS. Lawati laman web atau aplikasi rasmi terus untuk sahkan maklumat."
-    },
-    {
-      question: "'Kawan' dalam talian minta anda pinjam wang untuk kecemasan, anda tidak pernah jumpa orang ini. Apa yang perlu anda lakukan?",
-      options: [
-        "Hantar wang segera untuk bantu kawan",
-        "Tolak dan anggap ia mungkin penipuan",
-        "Pinjam jumlah kecil dahulu untuk cuba",
-        "Minta mereka tunjuk pengenalan diri"
-      ],
-      correctIndex: 1,
-      explanation: "Jangan sekali-kali hantar wang kepada kenalan dalam talian yang tidak pernah ditemui. Ini adalah penipuan romantik atau persahabatan biasa."
-    }
-  ] : [
-    {
-      question: "A caller claims to be from the police and asks you to transfer money to a 'safe account'. What should you do?",
-      options: [
-        "Transfer the money immediately",
-        "Hang up and call the police using their official number",
-        "Give them your bank details",
-        "Ask them to call back later"
-      ],
-      correctIndex: 1,
-      explanation: "Never transfer money or give personal details over the phone, even if the caller claims to be from the police. Always hang up and call back using official numbers."
-    },
-    {
-      question: "You receive an SMS saying your package needs extra fees with a link. What should you do?",
-      options: [
-        "Click the link to pay immediately",
-        "Ignore the SMS",
-        "Check through the official app or website",
-        "Reply to the SMS asking for details"
-      ],
-      correctIndex: 2,
-      explanation: "Don't click suspicious links in SMS. Go directly to official websites or apps to verify information."
-    },
-    {
-      question: "An online 'friend' asks to borrow money for an emergency, you've never met this person. What should you do?",
-      options: [
-        "Send money immediately to help",
-        "Refuse and consider it might be a scam",
-        "Send a small amount first to test",
-        "Ask them to provide ID proof"
-      ],
-      correctIndex: 1,
-      explanation: "Never send money to online friends you've never met in person. This is a classic romance or friendship scam."
-    }
-  ];
+    
+    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+    setShuffledQuestions(shuffled);
+    setCurrentQuestion(0);
+    setScore(0);
+    setAnsweredCount(0);
+    
+    const initialState: QuizState = {
+      shuffledQuestionIds: shuffled.map(q => q.id),
+      currentQuestionIndex: 0,
+      score: 0,
+      answeredCount: 0,
+      language
+    };
+    sessionStorage.setItem('scamshield-quiz-state', JSON.stringify(initialState));
+  }, [language]);
+
+  const questions = shuffledQuestions.map(q => ({
+    question: getText(q.question, language),
+    options: q.options.map(opt => getText(opt, language)),
+    correctIndex: q.correctIndex,
+    explanation: getText(q.explanation, language)
+  }));
 
   const handleAnswer = (isCorrect: boolean) => {
-    if (isCorrect) {
-      setScore(score + 1);
-    }
-    setAnsweredCount(answeredCount + 1);
+    const newScore = isCorrect ? score + 1 : score;
+    const newAnsweredCount = answeredCount + 1;
+    
+    setScore(newScore);
+    setAnsweredCount(newAnsweredCount);
     
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
+        const newQuestionIndex = currentQuestion + 1;
+        setCurrentQuestion(newQuestionIndex);
+        
+        const state: QuizState = {
+          shuffledQuestionIds: shuffledQuestions.map(q => q.id),
+          currentQuestionIndex: newQuestionIndex,
+          score: newScore,
+          answeredCount: newAnsweredCount,
+          language
+        };
+        sessionStorage.setItem('scamshield-quiz-state', JSON.stringify(state));
       } else {
         setShowResults(true);
+        sessionStorage.removeItem('scamshield-quiz-state');
       }
     }, 2000);
   };
 
   const handleRestart = () => {
+    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+    
+    setShowResults(false);
+    setShuffledQuestions(shuffled);
     setCurrentQuestion(0);
     setScore(0);
     setAnsweredCount(0);
-    setShowResults(false);
+    
+    const initialState: QuizState = {
+      shuffledQuestionIds: shuffled.map(q => q.id),
+      currentQuestionIndex: 0,
+      score: 0,
+      answeredCount: 0,
+      language
+    };
+    sessionStorage.setItem('scamshield-quiz-state', JSON.stringify(initialState));
   };
 
   const handleShare = () => {
@@ -147,12 +128,44 @@ export default function QuizPage() {
       ? `Saya skor ${score}/${questions.length} dalam kuiz ScamShield+! Uji pengetahuan pencegahan penipuan anda!`
       : `I scored ${score}/${questions.length} on the ScamShield+ quiz! Test your scam prevention knowledge!`;
     
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    
     if (navigator.share) {
-      navigator.share({ text });
+      navigator.share({ text }).catch(() => {
+        window.open(whatsappUrl, '_blank');
+      });
     } else {
-      alert(text);
+      window.open(whatsappUrl, '_blank');
     }
   };
+
+  if (!shuffledQuestions.length) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={() => setLocation('/')}
+            className="min-h-[60px] min-w-[60px]"
+            data-testid="button-back"
+          >
+            <ChevronLeft className="h-8 w-8" />
+            <span className="text-xl ml-2">
+              {language === 'zh' ? '返回' : language === 'ms' ? 'Kembali' : 'Back'}
+            </span>
+          </Button>
+        </div>
+        <Card className="p-8">
+          <div className="text-center py-12">
+            <div className="text-2xl mb-4">
+              {language === 'zh' ? '加载中...' : language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   if (showResults) {
     const percentage = (score / questions.length) * 100;
