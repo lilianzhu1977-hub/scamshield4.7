@@ -27,16 +27,26 @@ export default function QuizCard({
 }: QuizCardProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [shuffledOptions, setShuffledOptions] = useState<{ text: string; originalIndex: number }[]>([]);
+  const [newCorrectIndex, setNewCorrectIndex] = useState<number>(correctIndex);
+
+  // Shuffle options once when component mounts
+  useState(() => {
+    const optionsWithIndex = options.map((text, index) => ({ text, originalIndex: index }));
+    const shuffled = [...optionsWithIndex].sort(() => Math.random() - 0.5);
+    setShuffledOptions(shuffled);
+    setNewCorrectIndex(shuffled.findIndex(opt => opt.originalIndex === correctIndex));
+  });
 
   const handleSelect = (index: number) => {
     if (showFeedback) return;
     
     setSelectedIndex(index);
     setShowFeedback(true);
-    onAnswer(index === correctIndex);
+    onAnswer(index === newCorrectIndex);
   };
 
-  const isCorrect = selectedIndex === correctIndex;
+  const isCorrect = selectedIndex === newCorrectIndex;
 
   return (
     <Card data-testid={testId} className="p-8 max-w-3xl mx-auto">
@@ -49,9 +59,9 @@ export default function QuizCard({
       </div>
 
       <div className="space-y-4 mb-6">
-        {options.map((option, index) => {
+        {shuffledOptions.map((option, index) => {
           const isSelected = selectedIndex === index;
-          const isCorrectOption = index === correctIndex;
+          const isCorrectOption = index === newCorrectIndex;
           
           let variant: "outline" | "default" | "destructive" = "outline";
           if (showFeedback && isCorrectOption) variant = "default";
@@ -72,7 +82,7 @@ export default function QuizCard({
                   {showFeedback && isSelected && !isCorrect && <XCircle className="w-5 h-5" />}
                   {!showFeedback && <span>{String.fromCharCode(65 + index)}</span>}
                 </div>
-                <span className="flex-1">{option}</span>
+                <span className="flex-1">{option.text}</span>
               </div>
             </Button>
           );
