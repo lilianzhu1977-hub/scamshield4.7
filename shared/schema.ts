@@ -1,18 +1,55 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+export type Language = 'en' | 'zh' | 'ms';
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
+export interface TranslatedText {
+  en: string;
+  zh: string;
+  ms: string;
+}
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export interface ScamType {
+  id: string;
+  title: TranslatedText;
+  description: TranslatedText;
+  story: TranslatedText;
+  icon: string;
+}
+
+export interface VideoContent {
+  id: string;
+  title: TranslatedText;
+  description: TranslatedText;
+  thumbnail: string;
+  videoUrl: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: TranslatedText;
+  options: TranslatedText[];
+  correctIndex: number;
+  explanation: TranslatedText;
+}
+
+export interface SimulationStep {
+  id: number;
+  title: TranslatedText;
+  description: TranslatedText;
+  visual: string;
+}
+
+export interface TipStep {
+  id: string;
+  icon: string;
+  title: TranslatedText;
+  description: TranslatedText;
+}
+
+export interface NewsItem {
+  id: string;
+  title: TranslatedText;
+  summary: TranslatedText;
+  date: string;
+  severity: 'high' | 'medium' | 'low';
+}
