@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, AlertTriangle } from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import NewsCard from "@/components/NewsCard";
 import { useApp } from "@/contexts/AppContext";
@@ -7,6 +8,7 @@ import { useApp } from "@/contexts/AppContext";
 export default function NewsPage() {
   const [, setLocation] = useLocation();
   const { language } = useApp();
+  const [showAlert, setShowAlert] = useState(true);
 
   const newsItems = language === 'zh' ? [
     {
@@ -116,6 +118,33 @@ export default function NewsPage() {
           {language === 'zh' ? '了解最新的诈骗趋势和警告' : language === 'ms' ? 'Kekal dikemas kini dengan trend dan amaran penipuan terkini' : 'Stay updated with latest scam trends and warnings'}
         </p>
       </div>
+
+      {showAlert && (
+        <div className="mb-6 animate-in slide-in-from-top-4">
+          <div className="bg-destructive text-destructive-foreground p-6 rounded-lg border-2 border-destructive shadow-lg">
+            <div className="flex items-start gap-4">
+              <div className="animate-pulse">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-2">
+                  {language === 'zh' ? '⚠️ 紧急警报：新型诈骗正在流行' :
+                   language === 'ms' ? '⚠️ Amaran Segera: Penipuan Baharu Aktif' :
+                   '⚠️ URGENT ALERT: New Scam Wave Active'}
+                </h3>
+                <p>
+                  {language === 'zh' ? '骗子正在使用AI克隆的声音冒充家人。永远通过视频通话验证！' :
+                   language === 'ms' ? 'Penipu guna suara klon AI sebagai keluarga. Sentiasa sahkan dengan video call!' :
+                   'Scammers using AI-cloned voices to impersonate family. Always verify with video call!'}
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setShowAlert(false)}>
+                ✕
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-6">
         {newsItems.map((news) => (

@@ -20,6 +20,8 @@ import TipsPage from "@/pages/TipsPage";
 import NewsPage from "@/pages/NewsPage";
 import ProgressPage from "@/pages/ProgressPage";
 import CommunityPage from "@/pages/CommunityPage";
+import FamilyViewPage from "@/pages/FamilyViewPage";
+import NotFound from "@/pages/not-found";
 import { translations } from "@/lib/translations";
 
 function Router() {
@@ -35,6 +37,8 @@ function Router() {
       <Route path="/news" component={NewsPage} />
       <Route path="/progress" component={ProgressPage} />
       <Route path="/community" component={CommunityPage} />
+      <Route path="/family" component={FamilyViewPage} />
+      <Route component={NotFound} />
     </Switch>
   );
 }

@@ -63,6 +63,12 @@ export default function HomePage() {
       path: '/news',
       testId: 'card-module-news'
     },
+    {
+      icon: Users,
+      titleKey: 'family',
+      path: '/family',
+      testId: 'card-module-family'
+    },
   ];
 
   return (
