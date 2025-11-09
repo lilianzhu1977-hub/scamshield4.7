@@ -169,16 +169,11 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
-
-  .dark body {
-    @apply bg-background;
-    color: white; /* Set text color to white in dark mode */
-  }
-
+}
 
 /**
  * Using the elevate system.
