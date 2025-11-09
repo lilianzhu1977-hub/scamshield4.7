@@ -1,4 +1,4 @@
-import { BookOpen, Video, Smartphone, Trophy, Phone, Lightbulb, Newspaper } from "lucide-react";
+import { BookOpen, Video, Smartphone, Trophy, Phone, Lightbulb, Newspaper, TrendingUp, Users } from "lucide-react";
 import ModuleCard from "@/components/ModuleCard";
 import { useApp } from "@/contexts/AppContext";
 import { translations } from "@/lib/translations";
@@ -32,6 +32,18 @@ export default function HomePage() {
       titleKey: 'quiz',
       path: '/quiz',
       testId: 'card-module-quiz'
+    },
+    {
+      icon: TrendingUp,
+      titleKey: 'progress',
+      path: '/progress',
+      testId: 'card-module-progress'
+    },
+    {
+      icon: Users,
+      titleKey: 'community',
+      path: '/community',
+      testId: 'card-module-community'
     },
     {
       icon: Phone,

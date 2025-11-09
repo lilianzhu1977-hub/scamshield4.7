@@ -18,6 +18,8 @@ import QuizPage from "@/pages/QuizPage";
 import HelpLinesPage from "@/pages/HelpLinesPage";
 import TipsPage from "@/pages/TipsPage";
 import NewsPage from "@/pages/NewsPage";
+import ProgressPage from "@/pages/ProgressPage";
+import CommunityPage from "@/pages/CommunityPage";
 import { translations } from "@/lib/translations";
 
 function Router() {
@@ -31,6 +33,8 @@ function Router() {
       <Route path="/helplines" component={HelpLinesPage} />
       <Route path="/tips" component={TipsPage} />
       <Route path="/news" component={NewsPage} />
+      <Route path="/progress" component={ProgressPage} />
+      <Route path="/community" component={CommunityPage} />
     </Switch>
   );
 }

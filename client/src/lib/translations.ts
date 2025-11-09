@@ -61,6 +61,16 @@ export const translations = {
       zh: "测验",
       ms: "Kuiz"
     },
+    progress: {
+      en: "My Progress",
+      zh: "我的进度",
+      ms: "Kemajuan Saya"
+    },
+    community: {
+      en: "Community",
+      zh: "社区",
+      ms: "Komuniti"
+    },
     helplines: {
       en: "Help Lines",
       zh: "求助热线",
