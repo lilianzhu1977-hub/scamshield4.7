@@ -1,0 +1,113 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+7:42:03 AM [express] serving on port 5000
+
+A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+Chat error: Error: All attempts to open a WebSocket to connect to the database failed. Please refer to https://github.com/neondatabase/serverless/blob/main/CONFIG.md#websocketconstructor-typeof-websocket--undefined. Details: fetch failed
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DbStorage.getUserByUsername (/home/runner/workspace/server/storage.ts:72:20)
+    at async getOrCreateSessionUser (/home/runner/workspace/server/routes.ts:61:16)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:96:20)
+7:42:20 AM [express] POST /api/chat 500 in 28ms :: {"error":"Failed to process chat message"}
+7:42:28 AM [express] GET /api/achievements/en 200 in 6ms
+7:42:28 AM [express] GET /api/progress/en 200 in 7ms
+7:45:14 AM [vite] hmr update /src/pages/LearnPage.tsx, /src/index.css?v=E4VEMyXUqRkXjE2QkDWXr, /src/pages/QuizPage.tsx
+7:45:15 AM [vite] hmr update /src/components/SpotScamCard.tsx, /src/index.css?v=E4VEMyXUqRkXjE2QkDWXr
+7:45:15 AM [vite] hmr update /src/pages/QuizPage.tsx, /src/index.css?v=E4VEMyXUqRkXjE2QkDWXr
+[replit-cartographer] Error processing /home/runner/workspace/client/src/components/SpotScamCard.tsx: SyntaxError: Identifier 'Card' has already been declared. (9:9)
+    at toParseError (/home/runner/workspace/node_modules/@babel/parser/src/parse-error.ts:95:45)
+    at raise (/home/runner/workspace/node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
+    at declareName (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/scope.ts:72:21)
+    at declareNameFromIdentifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:818:16)
+    at checkIdentifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:813:12)
+    at checkLVal (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:713:12)
+    at finishImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3223:10)
+    at parseImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3480:17)
+    at parseImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:4359:20)
+    at parseNamedImportSpecifiers (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3441:36)
+    at parseImportSpecifiersAndAfter (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3173:37)
+    at parseImport (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3142:17)
+    at parseImport (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:3011:28)
+    at parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:642:25)
+    at parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
+    at parseStatementLike (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:477:17)
+    at parseModuleItem (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:414:17)
+    at parseBlockOrModuleBlockBody (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:1438:16)
+    at parseBlockBody (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:1412:10)
+    at parseProgram (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:229:10)
+    at parseTopLevel (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:203:25)
+    at parse (/home/runner/workspace/node_modules/@babel/parser/src/parser/index.ts:93:10)
+    at parse (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:4309:20)
+    at parse (/home/runner/workspace/node_modules/@babel/parser/src/index.ts:92:38)
+    at TransformPluginContext.handler (/home/runner/workspace/node_modules/@replit/vite-plugin-cartographer/dist/index.mjs:48:23)
+    at PluginContainer.transform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:49100:19)
+    at loadAndTransform (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:51977:49)
+    at async viteTransformMiddleware (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D_zLpgQd.js:62105:24) {
+  code: 'BABEL_PARSER_SYNTAX_ERROR',
+  reasonCode: 'VarRedeclaration',
+  loc: Position { line: 9, column: 9, index: 343 },
+  pos: 343,
+  syntaxPlugin: undefined
+}
+7:45:18 AM [vite] Internal server error: /home/runner/workspace/client/src/components/SpotScamCard.tsx: Identifier 'Card' has already been declared. (9:9)
+
+   7 | import { useApp } from "@/contexts/AppContext";
+   8 |
+>  9 | import { Card } from "@/components/ui/card";
+     |          ^
+  10 | import { Button } from "@/components/ui/button";
+  11 | import { Badge } from "@/components/ui/badge";
+  12 | import { Smartphone, Mail, Phone, MessageSquare, AlertTriangle, CheckCircle2, XCircle, Eye } from "lucide-react";
+  Plugin: vite:react-babel
+  File: /home/runner/workspace/client/src/components/SpotScamCard.tsx:9:9
+  7  |  import { useApp } from "@/contexts/AppContext";
+  8  |  
+  9  |  import { Card } from "@/components/ui/card";
+     |           ^
+  10 |  import { Button } from "@/components/ui/button";
+  11 |  import { Badge } from "@/components/ui/badge";
+      at toParseError (/home/runner/workspace/node_modules/@babel/parser/src/parse-error.ts:95:45)
+      at raise (/home/runner/workspace/node_modules/@babel/parser/src/tokenizer/index.ts:1503:19)
+      at declareName (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/scope.ts:72:21)
+      at declareNameFromIdentifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:818:16)
+      at checkIdentifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:813:12)
+      at checkLVal (/home/runner/workspace/node_modules/@babel/parser/src/parser/lval.ts:713:12)
+      at finishImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3223:10)
+      at parseImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3480:17)
+      at parseImportSpecifier (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:4359:20)
+      at parseNamedImportSpecifiers (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3441:36)
+      at parseImportSpecifiersAndAfter (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3173:37)
+      at parseImport (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:3142:17)
+      at parseImport (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:3011:28)
+      at parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:642:25)
+      at parseStatementContent (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:3185:20)
+      at parseStatementLike (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:477:17)
+      at parseModuleItem (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:414:17)
+      at parseBlockOrModuleBlockBody (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:1438:16)
+      at parseBlockBody (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:1412:10)
+      at parseProgram (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:229:10)
+      at parseTopLevel (/home/runner/workspace/node_modules/@babel/parser/src/parser/statement.ts:203:25)
+      at parse (/home/runner/workspace/node_modules/@babel/parser/src/parser/index.ts:93:10)
+      at parse (/home/runner/workspace/node_modules/@babel/parser/src/plugins/typescript/index.ts:4309:20)
+      at parse (/home/runner/workspace/node_modules/@babel/parser/src/index.ts:92:38)
+      at parser (/home/runner/workspace/node_modules/@babel/core/src/parser/index.ts:28:19)
+      at parser.next (<anonymous>)
+      at normalizeFile (/home/runner/workspace/node_modules/@babel/core/src/transformation/normalize-file.ts:49:24)
+      at normalizeFile.next (<anonymous>)
+      at run (/home/runner/workspace/node_modules/@babel/core/src/transformation/index.ts:40:36)
+      at run.next (<anonymous>)
+      at transform (/home/runner/workspace/node_modules/@babel/core/src/transform.ts:29:20)
+      at transform.next (<anonymous>)
+      at step (/home/runner/workspace/node_modules/gensync/index.js:261:32)
+      at /home/runner/workspace/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/home/runner/workspace/node_modules/gensync/index.js:223:11)
+      at /home/runner/workspace/node_modules/gensync/index.js:189:28
+      at <anonymous> (/home/runner/workspace/node_modules/@babel/core/src/gensync-utils/async.ts:90:7)
+      at /home/runner/workspace/node_modules/gensync/index.js:113:33
+      at step (/home/runner/workspace/node_modules/gensync/index.js:287:14)
+      at /home/runner/workspace/node_modules/gensync/index.js:273:13
+      at async.call.result.err.err (/home/runner/workspace/node_modules/gensync/index.js:223:11)
