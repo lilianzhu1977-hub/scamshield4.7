@@ -6,7 +6,8 @@ import QuizCard from "@/components/QuizCard";
 import SpotScamCard from "@/components/SpotScamCard";
 import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
-import { quizQuestions as allQuestions, spotScamQuestions } from "@shared/data/content";
+import { quizQuestions as allQuestions } from "@shared/data/content";
+import { spotScamQuestions } from "@shared/data/spotScamQuestions";
 import { getText } from "@/lib/translations";
 import { Badge } from "@/components/ui/badge";
 
