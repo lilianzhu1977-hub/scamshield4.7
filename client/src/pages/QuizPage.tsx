@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, Trophy, Share2 } from "lucide-react";
+import { ChevronLeft, Trophy, Share2, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import QuizCard from "@/components/QuizCard";
+import SpotScamCard from "@/components/SpotScamCard";
 import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
-import { quizQuestions as allQuestions } from "@shared/data/content";
+import { quizQuestions as allQuestions, spotScamQuestions } from "@shared/data/content";
 import { getText } from "@/lib/translations";
+import { Badge } from "@/components/ui/badge";
 
 interface QuizState {
   shuffledQuestionIds: string[];
@@ -19,74 +21,42 @@ interface QuizState {
 export default function QuizPage() {
   const [, setLocation] = useLocation();
   const { language } = useApp();
+  const [quizMode, setQuizMode] = useState<'traditional' | 'spot-scam' | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [shuffledQuestions, setShuffledQuestions] = useState<typeof allQuestions>([]);
+  const [spotScams, setSpotScams] = useState<typeof spotScamQuestions[keyof typeof spotScamQuestions]>([]);
 
   useEffect(() => {
-    const savedStateStr = sessionStorage.getItem('scamshield-quiz-state');
-    
-    if (savedStateStr) {
-      try {
-        const savedState: QuizState = JSON.parse(savedStateStr);
-        
-        if (savedState.language === language) {
-          const questionMap = new Map(allQuestions.map(q => [q.id, q]));
-          const restoredQuestions = savedState.shuffledQuestionIds
-            .map(id => questionMap.get(id))
-            .filter((q): q is typeof allQuestions[0] => q !== undefined);
-          
-          if (restoredQuestions.length > 0) {
-            const validIndex = Math.min(savedState.currentQuestionIndex, restoredQuestions.length - 1);
-            setShuffledQuestions(restoredQuestions);
-            setCurrentQuestion(Math.max(0, validIndex));
-            setScore(savedState.score);
-            setAnsweredCount(savedState.answeredCount);
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('Failed to restore quiz state:', e);
-      }
-    }
-    
-    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
+    const questionsForLanguage = allQuestions.filter(q => q.language === language);
+    const shuffled = [...questionsForLanguage].sort(() => Math.random() - 0.5);
     setShuffledQuestions(shuffled);
+
+    const spotScamsForLanguage = spotScamQuestions[language] || spotScamQuestions.en;
+    const shuffledSpotScams = [...spotScamsForLanguage].sort(() => Math.random() - 0.5);
+    setSpotScams(shuffledSpotScams);
+
     setCurrentQuestion(0);
     setScore(0);
     setAnsweredCount(0);
-    
-    const initialState: QuizState = {
-      shuffledQuestionIds: shuffled.map(q => q.id),
-      currentQuestionIndex: 0,
-      score: 0,
-      answeredCount: 0,
-      language
-    };
-    sessionStorage.setItem('scamshield-quiz-state', JSON.stringify(initialState));
+    setShowResults(false);
+    setQuizMode(null);
   }, [language]);
-
-  const questions = shuffledQuestions.map(q => ({
-    question: getText(q.question, language),
-    options: q.options.map(opt => getText(opt, language)),
-    correctIndex: q.correctIndex,
-    explanation: getText(q.explanation, language)
-  }));
 
   const handleAnswer = (isCorrect: boolean) => {
     const newScore = isCorrect ? score + 1 : score;
     const newAnsweredCount = answeredCount + 1;
-    
+
     setScore(newScore);
     setAnsweredCount(newAnsweredCount);
-    
+
     setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
+      if (currentQuestion < shuffledQuestions.length - 1) {
         const newQuestionIndex = currentQuestion + 1;
         setCurrentQuestion(newQuestionIndex);
-        
+
         const state: QuizState = {
           shuffledQuestionIds: shuffledQuestions.map(q => q.id),
           currentQuestionIndex: newQuestionIndex,
@@ -103,14 +73,17 @@ export default function QuizPage() {
   };
 
   const handleRestart = () => {
-    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 10);
-    
+    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+    const shuffledSpotScams = [...(spotScamQuestions[language] || spotScamQuestions.en)].sort(() => Math.random() - 0.5);
+
     setShowResults(false);
     setShuffledQuestions(shuffled);
+    setSpotScams(shuffledSpotScams);
     setCurrentQuestion(0);
     setScore(0);
     setAnsweredCount(0);
-    
+    setQuizMode(null);
+
     const initialState: QuizState = {
       shuffledQuestionIds: shuffled.map(q => q.id),
       currentQuestionIndex: 0,
@@ -123,13 +96,13 @@ export default function QuizPage() {
 
   const handleShare = () => {
     const text = language === 'zh'
-      ? `我在ScamShield+测验中得了${score}/${questions.length}分！来测试你的防诈骗知识吧！`
+      ? `我在ScamShield+测验中得了${score}/${(quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length)}分！来测试你的防诈骗知识吧！`
       : language === 'ms'
-      ? `Saya skor ${score}/${questions.length} dalam kuiz ScamShield+! Uji pengetahuan pencegahan penipuan anda!`
-      : `I scored ${score}/${questions.length} on the ScamShield+ quiz! Test your scam prevention knowledge!`;
-    
+      ? `Saya skor ${score}/${(quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length)} dalam kuiz ScamShield+! Uji pengetahuan pencegahan penipuan anda!`
+      : `I scored ${score}/${(quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length)} on the ScamShield+ quiz! Test your scam prevention knowledge!`;
+
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-    
+
     if (navigator.share) {
       navigator.share({ text }).catch(() => {
         window.open(whatsappUrl, '_blank');
@@ -139,7 +112,7 @@ export default function QuizPage() {
     }
   };
 
-  if (!shuffledQuestions.length) {
+  if (!shuffledQuestions.length && !spotScams.length) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-8">
@@ -167,92 +140,197 @@ export default function QuizPage() {
     );
   }
 
-  if (showResults) {
-    const percentage = (score / questions.length) * 100;
-    let title, badge;
-    
-    if (percentage >= 80) {
-      title = language === 'zh' ? '诈骗守护者 🎉' : language === 'ms' ? 'Penjaga Penipuan 🎉' : 'Scam Guardian 🎉';
-      badge = '🏆';
-    } else if (percentage >= 50) {
-      title = language === 'zh' ? '诈骗斗士' : language === 'ms' ? 'Pejuang Penipuan' : 'Scam Fighter';
-      badge = '🥈';
-    } else {
-      title = language === 'zh' ? '初学者' : language === 'ms' ? 'Pemula' : 'Beginner';
-      badge = '🥉';
-    }
-
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <Card className="p-12 text-center">
-          <div className="text-9xl mb-6">{badge}</div>
-          <h1 className="text-4xl font-bold mb-2">{title}</h1>
-          <p className="text-6xl font-bold text-primary mb-6">{score}/{questions.length}</p>
-          <p className="text-xl text-muted-foreground mb-8">
-            {language === 'zh' 
-              ? percentage >= 80 ? '太棒了！你对诈骗有深入了解。' : percentage >= 50 ? '不错！继续学习以提高你的防护能力。' : '继续努力！复习学习模块以增强你的知识。'
-              : language === 'ms'
-              ? percentage >= 80 ? 'Hebat! Anda mempunyai pemahaman yang kuat tentang penipuan.' : percentage >= 50 ? 'Bagus! Terus belajar untuk tingkatkan pertahanan anda.' : 'Terus berusaha! Semak modul pembelajaran untuk perkuatkan pengetahuan.'
-              : percentage >= 80 ? 'Excellent! You have strong scam awareness.' : percentage >= 50 ? 'Good job! Keep learning to improve your defenses.' : 'Keep trying! Review the learning modules to strengthen your knowledge.'}
-          </p>
-          
-          <div className="flex gap-4 justify-center">
-            <Button
-              data-testid="button-restart-quiz"
-              size="lg"
-              onClick={handleRestart}
-              className="gap-2"
-            >
-              <Trophy className="w-5 h-5" />
-              {language === 'zh' ? '再试一次' : language === 'ms' ? 'Cuba Lagi' : 'Try Again'}
-            </Button>
-            <Button
-              data-testid="button-share-results"
-              size="lg"
-              variant="outline"
-              onClick={handleShare}
-              className="gap-2"
-            >
-              <Share2 className="w-5 h-5" />
-              {language === 'zh' ? '分享成绩' : language === 'ms' ? 'Kongsi Keputusan' : 'Share Results'}
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const questions = shuffledQuestions.map(q => ({
+    question: getText(q.question, language),
+    options: q.options.map(opt => getText(opt, language)),
+    correctIndex: q.correctIndex,
+    explanation: getText(q.explanation, language)
+  }));
 
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-3xl mx-auto mb-8">
-        <Button
-          data-testid="button-back"
-          variant="ghost"
-          onClick={() => setLocation('/')}
-          className="mb-4"
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          {language === 'zh' ? '返回' : language === 'ms' ? 'Kembali' : 'Back'}
-        </Button>
-        <h1 className="text-4xl font-bold mb-2">
-          {language === 'zh' ? '防诈骗测验' : language === 'ms' ? 'Kuiz Pencegahan Penipuan' : 'Scam Prevention Quiz'}
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          {language === 'zh' ? '测试你的防诈骗知识' : language === 'ms' ? 'Uji pengetahuan pencegahan penipuan anda' : 'Test your scam prevention knowledge'}
-        </p>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <Button
+        variant="ghost"
+        onClick={() => {
+          if (quizMode && !showResults) {
+            setQuizMode(null);
+          } else {
+            setLocation('/');
+          }
+        }}
+        className="mb-6"
+      >
+        <ChevronLeft className="w-4 h-4 mr-2" />
+        {quizMode && !showResults ? (language === 'zh' ? '返回模式选择' : language === 'ms' ? 'Kembali ke Mod' : 'Back to Mode Selection') : getText('back', language)}
+      </Button>
 
-      <QuizCard
-        key={currentQuestion}
-        questionNumber={currentQuestion + 1}
-        totalQuestions={questions.length}
-        question={questions[currentQuestion].question}
-        options={questions[currentQuestion].options}
-        correctIndex={questions[currentQuestion].correctIndex}
-        explanation={questions[currentQuestion].explanation}
-        onAnswer={handleAnswer}
-        testId={`quiz-question-${currentQuestion}`}
-      />
+      {!quizMode && (
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4 text-center">
+            {language === 'zh' ? '选择测验模式' : language === 'ms' ? 'Pilih Mod Kuiz' : 'Choose Quiz Mode'}
+          </h1>
+          <p className="text-muted-foreground text-center mb-8">
+            {language === 'zh' ? '选择你的学习方式' : language === 'ms' ? 'Pilih cara pembelajaran anda' : 'Select your learning style'}
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+              onClick={() => setQuizMode('traditional')}
+            >
+              <div className="text-center">
+                <Trophy className="w-16 h-16 mx-auto mb-4 text-primary" />
+                <h2 className="text-2xl font-bold mb-2">
+                  {language === 'zh' ? '传统测验' : language === 'ms' ? 'Kuiz Tradisional' : 'Traditional Quiz'}
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  {language === 'zh' ? '多项选择题测试你的知识' : language === 'ms' ? 'Soalan pelbagai pilihan ujian pengetahuan anda' : 'Multiple choice questions to test your knowledge'}
+                </p>
+                <Badge variant="secondary">
+                  {shuffledQuestions.length} {language === 'zh' ? '题' : language === 'ms' ? 'soalan' : 'questions'}
+                </Badge>
+              </div>
+            </Card>
+
+            <Card 
+              className="p-8 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-destructive"
+              onClick={() => setQuizMode('spot-scam')}
+            >
+              <div className="text-center">
+                <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                <h2 className="text-2xl font-bold mb-2">
+                  {language === 'zh' ? '发现诈骗' : language === 'ms' ? 'Kesan Penipuan' : 'Spot the Scam'}
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  {language === 'zh' ? '分析真实场景，识别诈骗' : language === 'ms' ? 'Analisis senario sebenar, kenal pasti penipuan' : 'Analyze real scenarios and identify scams'}
+                </p>
+                <Badge variant="destructive">
+                  {spotScams.length} {language === 'zh' ? '场景' : language === 'ms' ? 'senario' : 'scenarios'}
+                </Badge>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {quizMode === 'spot-scam' && !showResults && spotScams.length > 0 && (
+        <div>
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold mb-2">
+              {language === 'zh' ? '发现诈骗挑战' : language === 'ms' ? 'Cabaran Kesan Penipuan' : 'Spot the Scam Challenge'}
+            </h2>
+            <p className="text-muted-foreground">
+              {language === 'zh' ? `场景 ${currentQuestion + 1} / ${spotScams.length}` : 
+               language === 'ms' ? `Senario ${currentQuestion + 1} / ${spotScams.length}` :
+               `Scenario ${currentQuestion + 1} of ${spotScams.length}`}
+            </p>
+            <p className="text-lg font-semibold mt-2">
+              {language === 'zh' ? `得分: ${score}` : language === 'ms' ? `Skor: ${score}` : `Score: ${score}`}
+            </p>
+          </div>
+
+          <SpotScamCard
+            {...spotScams[currentQuestion]}
+            onAnswer={(correct) => {
+              if (correct) setScore(score + 20);
+              setAnsweredCount(answeredCount + 1);
+
+              setTimeout(() => {
+                if (currentQuestion < spotScams.length - 1) {
+                  setCurrentQuestion(currentQuestion + 1);
+                } else {
+                  setShowResults(true);
+                }
+              }, 3000);
+            }}
+          />
+        </div>
+      )}
+
+      {quizMode === 'traditional' && !showResults && shuffledQuestions.length > 0 && (
+        <QuizCard
+          questionNumber={currentQuestion + 1}
+          totalQuestions={shuffledQuestions.length}
+          question={shuffledQuestions[currentQuestion].question}
+          options={shuffledQuestions[currentQuestion].options}
+          correctIndex={shuffledQuestions[currentQuestion].correctIndex}
+          explanation={shuffledQuestions[currentQuestion].explanation}
+          onAnswer={(isCorrect) => {
+            if (isCorrect) setScore(score + 10);
+            setAnsweredCount(answeredCount + 1);
+
+            setTimeout(() => {
+              if (currentQuestion < shuffledQuestions.length - 1) {
+                setCurrentQuestion(currentQuestion + 1);
+              } else {
+                setShowResults(true);
+              }
+            }, 2000);
+          }}
+          testId="quiz-card"
+        />
+      )}
+
+      {showResults ? (
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <Card className="p-12 text-center">
+            <div className="text-9xl mb-6">
+              {(() => {
+                const percentage = (score / (quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length)) * 100;
+                if (percentage >= 80) return '🏆';
+                if (percentage >= 50) return '🥈';
+                return '🥉';
+              })()}
+            </div>
+            <h1 className="text-4xl font-bold mb-2">
+              {(() => {
+                const percentage = (score / (quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length)) * 100;
+                if (percentage >= 80) return language === 'zh' ? '诈骗守护者 🎉' : language === 'ms' ? 'Penjaga Penipuan 🎉' : 'Scam Guardian 🎉';
+                if (percentage >= 50) return language === 'zh' ? '诈骗斗士' : language === 'ms' ? 'Pejuang Penipuan' : 'Scam Fighter';
+                return language === 'zh' ? '初学者' : language === 'ms' ? 'Pemula' : 'Beginner';
+              })()}
+            </h1>
+            <p className="text-6xl font-bold text-primary mb-6">{score}/{quizMode === 'spot-scam' ? spotScams.length : shuffledQuestions.length}</p>
+            <p className="text-muted-foreground mb-4">
+              {getText('quizComplete', language)}
+            </p>
+            <Badge variant="outline" className="mb-8">
+              {quizMode === 'spot-scam' 
+                ? (language === 'zh' ? '发现诈骗模式' : language === 'ms' ? 'Mod Kesan Penipuan' : 'Spot the Scam Mode')
+                : (language === 'zh' ? '传统测验模式' : language === 'ms' ? 'Mod Kuiz Tradisional' : 'Traditional Quiz Mode')
+              }
+            </Badge>
+
+            <div className="flex gap-4 justify-center">
+              <Button
+                data-testid="button-restart-quiz"
+                size="lg"
+                onClick={() => {
+                  setCurrentQuestion(0);
+                  setScore(0);
+                  setAnsweredCount(0);
+                  setShowResults(false);
+                  setQuizMode(null);
+                }}
+                className="gap-2"
+              >
+                <Trophy className="w-5 h-5" />
+                {language === 'zh' ? '再试一次' : language === 'ms' ? 'Cuba Lagi' : 'Try Again'}
+              </Button>
+              <Button
+                data-testid="button-share-results"
+                size="lg"
+                variant="outline"
+                onClick={handleShare}
+                className="gap-2"
+              >
+                <Share2 className="w-5 h-5" />
+                {language === 'zh' ? '分享成绩' : language === 'ms' ? 'Kongsi Keputusan' : 'Share Results'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      ) : null}
     </div>
   );
 }
