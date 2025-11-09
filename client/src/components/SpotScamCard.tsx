@@ -6,6 +6,13 @@ import { AlertTriangle, CheckCircle2, XCircle, Phone, Mail, MessageSquare, Smart
 import { useState } from "react";
 import { useApp } from "@/contexts/AppContext";
 
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Smartphone, Mail, Phone, MessageSquare, AlertTriangle, CheckCircle2, XCircle, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useApp } from "@/contexts/AppContext";
+
 interface SpotScamCardProps {
   scenario: string;
   messageType: 'sms' | 'email' | 'call' | 'chat';
@@ -36,9 +43,20 @@ export default function SpotScamCard({
   const { language } = useApp();
   const [userChoice, setUserChoice] = useState<boolean | null>(null);
   const [showRedFlags, setShowRedFlags] = useState(false);
+  const [answered, setAnswered] = useState(false);
+
+  // Reset state when question changes
+  useEffect(() => {
+    setUserChoice(null);
+    setShowRedFlags(false);
+    setAnswered(false);
+  }, [content, scenario]);
 
   const handleChoice = (choice: boolean) => {
+    if (answered) return;
+    
     setUserChoice(choice);
+    setAnswered(true);
     onAnswer(choice === isScam);
   };
 
@@ -50,6 +68,135 @@ export default function SpotScamCard({
       case 'chat': return <MessageSquare className="w-5 h-5" />;
     }
   };
+
+  return (
+    <Card className="max-w-4xl mx-auto p-8">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-4">{scenario}</h2>
+        <Badge variant="outline" className="mb-4">
+          <span className="flex items-center gap-2">
+            {getIcon()}
+            {messageType.toUpperCase()}
+          </span>
+        </Badge>
+      </div>
+
+      <Card className="p-6 mb-6 bg-muted/50">
+        {sender && (
+          <div className="text-sm text-muted-foreground mb-2">
+            {language === 'zh' ? '发件人' : language === 'ms' ? 'Pengirim' : 'From'}: {sender}
+          </div>
+        )}
+        {caller && (
+          <div className="text-sm text-muted-foreground mb-2">
+            {language === 'zh' ? '来电者' : language === 'ms' ? 'Pemanggil' : 'Caller'}: {caller}
+          </div>
+        )}
+        {attachmentName && (
+          <div className="text-sm text-muted-foreground mb-2">
+            {language === 'zh' ? '附件' : language === 'ms' ? 'Lampiran' : 'Attachment'}: {attachmentName}
+          </div>
+        )}
+        <p className="text-lg mt-4">{content}</p>
+      </Card>
+
+      {!answered && (
+        <div className="space-y-4 mb-6">
+          <p className="text-lg font-semibold">
+            {language === 'zh' ? '这是诈骗吗？' : language === 'ms' ? 'Adakah ini penipuan?' : 'Is this a scam?'}
+          </p>
+          <div className="flex gap-4">
+            <Button
+              size="lg"
+              variant="destructive"
+              onClick={() => handleChoice(true)}
+              className="flex-1 h-20 text-xl"
+            >
+              <AlertTriangle className="w-6 h-6 mr-2" />
+              {language === 'zh' ? '是诈骗' : language === 'ms' ? 'Ya, Penipuan' : 'Yes, It\'s a Scam'}
+            </Button>
+            <Button
+              size="lg"
+              variant="default"
+              onClick={() => handleChoice(false)}
+              className="flex-1 h-20 text-xl"
+            >
+              <CheckCircle2 className="w-6 h-6 mr-2" />
+              {language === 'zh' ? '不是诈骗' : language === 'ms' ? 'Tidak, Sah' : 'No, It\'s Legitimate'}
+            </Button>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => setShowRedFlags(!showRedFlags)}
+            className="w-full"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            {showRedFlags 
+              ? (language === 'zh' ? '隐藏提示' : language === 'ms' ? 'Sembunyikan Petunjuk' : 'Hide Hints')
+              : (language === 'zh' ? '显示提示' : language === 'ms' ? 'Tunjuk Petunjuk' : 'Show Hints')
+            }
+          </Button>
+
+          {showRedFlags && redFlags.length > 0 && (
+            <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/20">
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                {language === 'zh' ? '注意这些警告信号：' : language === 'ms' ? 'Perhatikan tanda amaran:' : 'Watch for these red flags:'}
+              </h3>
+              <ul className="list-disc list-inside space-y-1">
+                {redFlags.map((flag, index) => (
+                  <li key={index} className="text-sm">{flag}</li>
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {answered && userChoice !== null && (
+        <Card className={`p-6 ${userChoice === isScam ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+          <div className="flex items-start gap-3 mb-4">
+            {userChoice === isScam ? (
+              <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />
+            ) : (
+              <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
+            )}
+            <div>
+              <h3 className="text-2xl font-bold mb-2">
+                {userChoice === isScam 
+                  ? (language === 'zh' ? '正确！' : language === 'ms' ? 'Betul!' : 'Correct!') 
+                  : (language === 'zh' ? '不完全正确' : language === 'ms' ? 'Tidak tepat' : 'Not quite right')
+                }
+              </h3>
+              <p className="text-lg mb-4">{explanation}</p>
+              
+              <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  {language === 'zh' ? '应该怎么做：' : language === 'ms' ? 'Apa yang perlu dilakukan:' : 'What to do:'}
+                </h4>
+                <p>{whatToDo}</p>
+              </div>
+
+              {redFlags.length > 0 && (
+                <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-semibold mb-2">
+                    {language === 'zh' ? '警告信号：' : language === 'ms' ? 'Tanda Amaran:' : 'Red Flags:'}
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1">
+                    {redFlags.map((flag, index) => (
+                      <li key={index} className="text-sm">{flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
+    </Card>
+  );
 
   const labels = {
     en: {

@@ -101,6 +101,7 @@ export const scamTypes = [
 export const quizQuestions = [
   {
     id: 'q1',
+    language: 'en',
     question: {
       en: "A caller claims to be from the police and asks you to transfer money to a 'safe account'. What should you do?",
       zh: "接到声称是警察的电话，要求你转账到'安全账户'，你应该怎么做？",
@@ -137,6 +138,7 @@ export const quizQuestions = [
   },
   {
     id: 'q2',
+    language: 'en',
     question: {
       en: "You receive an SMS saying your package needs extra fees with a link. What should you do?",
       zh: "你收到一条短信说你的包裹需要额外费用，并附有一个链接。你应该？",
@@ -173,6 +175,7 @@ export const quizQuestions = [
   },
   {
     id: 'q3',
+    language: 'en',
     question: {
       en: "An online 'friend' asks to borrow money for an emergency, you've never met this person. What should you do?",
       zh: "网上认识的'朋友'要求你借钱应急，你从未见过这个人。你应该？",
@@ -209,6 +212,7 @@ export const quizQuestions = [
   },
   {
     id: 'q4',
+    language: 'en',
     question: {
       en: "Someone calls claiming your computer has a virus and offers to fix it remotely. What should you do?",
       zh: "有人打电话说你的电脑有病毒，提出远程修复。你应该？",
@@ -245,6 +249,7 @@ export const quizQuestions = [
   },
   {
     id: 'q5',
+    language: 'en',
     question: {
       en: "You receive a job offer with very high pay but they ask for payment upfront for 'training materials'. Is this legitimate?",
       zh: "你收到一份薪水很高的工作机会，但他们要求先付款购买'培训材料'。这合法吗？",
@@ -281,6 +286,7 @@ export const quizQuestions = [
   },
   {
     id: 'q6',
+    language: 'en',
     question: {
       en: "A bank calls asking you to verify your account by providing your OTP. What should you do?",
       zh: "银行打电话要求你提供验证码来验证账户。你应该？",
@@ -317,6 +323,7 @@ export const quizQuestions = [
   },
   {
     id: 'q7',
+    language: 'en',
     question: {
       en: "You win a lottery you never entered. They ask for your bank details to transfer the prize. Should you provide them?",
       zh: "你赢得了从未参加过的彩票。他们要求你的银行信息来转账奖金。你应该提供吗？",
@@ -353,6 +360,7 @@ export const quizQuestions = [
   },
   {
     id: 'q8',
+    language: 'en',
     question: {
       en: "A website offers luxury goods at 90% discount but requires immediate payment via bank transfer. Is this safe?",
       zh: "一个网站以90%的折扣出售奢侈品，但要求通过银行转账立即付款。这安全吗？",
@@ -389,6 +397,7 @@ export const quizQuestions = [
   },
   {
     id: 'q9',
+    language: 'en',
     question: {
       en: "Your phone suddenly has apps you didn't install and unknown numbers appear in your call history. What should you do first?",
       zh: "你的手机突然出现未安装的应用，通话记录中有未知号码。你应该首先做什么？",
@@ -425,6 +434,7 @@ export const quizQuestions = [
   },
   {
     id: 'q10',
+    language: 'en',
     question: {
       en: "What is the ACT principle for scam prevention?",
       zh: "ACT防诈骗原则是什么？",

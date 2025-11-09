@@ -233,7 +233,8 @@ export default function QuizPage() {
           <SpotScamCard
             {...spotScams[currentQuestion]}
             onAnswer={(correct) => {
-              if (correct) setScore(score + 20);
+              const newScore = correct ? score + 1 : score;
+              setScore(newScore);
               setAnsweredCount(answeredCount + 1);
 
               setTimeout(() => {
@@ -242,7 +243,7 @@ export default function QuizPage() {
                 } else {
                   setShowResults(true);
                 }
-              }, 3000);
+              }, 4000);
             }}
           />
         </div>
@@ -257,7 +258,8 @@ export default function QuizPage() {
           correctIndex={shuffledQuestions[currentQuestion].correctIndex}
           explanation={shuffledQuestions[currentQuestion].explanation}
           onAnswer={(isCorrect) => {
-            if (isCorrect) setScore(score + 10);
+            const newScore = isCorrect ? score + 1 : score;
+            setScore(newScore);
             setAnsweredCount(answeredCount + 1);
 
             setTimeout(() => {
