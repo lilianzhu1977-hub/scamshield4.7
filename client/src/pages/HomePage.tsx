@@ -34,12 +34,6 @@ export default function HomePage() {
       testId: 'card-module-quiz'
     },
     {
-      icon: TrendingUp,
-      titleKey: 'progress',
-      path: '/progress',
-      testId: 'card-module-progress'
-    },
-    {
       icon: Users,
       titleKey: 'community',
       path: '/community',

@@ -1,23 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Language } from "@shared/schema";
-import type { GameModeId } from "@shared/types/gameTypes";
-import { queryClient } from "../lib/queryClient";
-
-interface GameStats {
-  gamesPlayed: number;
-  totalScore: number;
-  perfectScores: number;
-  bestScore: number;
-  lastPlayed: string;
-}
-
-interface ProgressData {
-  totalGamesPlayed: number;
-  gameStats: Partial<Record<GameModeId, GameStats>>;
-  achievements: string[];
-  streak: number;
-  lastPlayDate: string;
-}
 
 interface AppContextType {
   language: Language;
@@ -33,13 +15,9 @@ interface AppContextType {
   user: { name: string; initials: string } | null;
   setUser: (user: { name: string; initials: string } | null) => void;
   speak: (text: string) => void;
-  progress: ProgressData;
-  recordGameCompletion: (gameMode: GameModeId, score: number, total: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-const PROGRESS_KEY = 'scamshield_progress';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
@@ -48,109 +26,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [highContrast, setHighContrast] = useState(false);
   const [slowAnimation, setSlowAnimation] = useState(false);
   const [user, setUser] = useState<{ name: string; initials: string } | null>(null);
-  const [progress, setProgress] = useState<ProgressData>({
-    totalGamesPlayed: 0,
-    gameStats: {},
-    achievements: [],
-    streak: 0,
-    lastPlayDate: ''
-  });
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem(PROGRESS_KEY);
-    if (stored) {
-      try {
-        setProgress(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to load progress', e);
-      }
-    }
-  }, []);
-
-  const recordGameCompletion = async (gameMode: GameModeId, score: number, total: number) => {
-    // Submit quiz attempt to server
-    try {
-      const username = sessionStorage.getItem('scamshield_username');
-      const displayName = sessionStorage.getItem('scamshield_displayName');
-
-      if (username && displayName) {
-        const response = await fetch(`/api/quiz/attempt?language=${language}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username,
-            displayName,
-            questionId: `${gameMode}-${Date.now()}`,
-            selectedAnswer: score.toString(),
-            isCorrect: score === total,
-            timeSpent: 0
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to submit quiz attempt');
-        }
-
-        // Invalidate progress and achievements queries to refetch
-        await queryClient.invalidateQueries({ queryKey: ['/api/progress', language] });
-        await queryClient.invalidateQueries({ queryKey: ['/api/achievements', language] });
-      }
-    } catch (error) {
-      console.error('Failed to submit quiz attempt:', error);
-    }
-
-    setProgress(prev => {
-      const currentStats = prev.gameStats[gameMode] || {
-        gamesPlayed: 0,
-        totalScore: 0,
-        perfectScores: 0,
-        bestScore: 0,
-        lastPlayed: ''
-      };
-
-      const today = new Date().toISOString().split('T')[0];
-      const lastPlay = prev.lastPlayDate;
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-      const isConsecutiveDay = lastPlay === yesterday || lastPlay === today;
-
-
-      const isPerfect = score === total;
-      const newStats: GameStats = {
-        gamesPlayed: currentStats.gamesPlayed + 1,
-        totalScore: currentStats.totalScore + score,
-        perfectScores: currentStats.perfectScores + (isPerfect ? 1 : 0),
-        bestScore: Math.max(currentStats.bestScore, score),
-        lastPlayed: today
-      };
-
-      const newProgress: ProgressData = {
-        totalGamesPlayed: prev.totalGamesPlayed + 1,
-        gameStats: {
-          ...prev.gameStats,
-          [gameMode]: newStats
-        },
-        achievements: [...prev.achievements],
-        streak: isConsecutiveDay ? prev.streak + 1 : 1,
-        lastPlayDate: today
-      };
-
-      if (newProgress.totalGamesPlayed === 1 && !newProgress.achievements.includes('first-game')) {
-        newProgress.achievements.push('first-game');
-      }
-      if (newProgress.totalGamesPlayed === 10 && !newProgress.achievements.includes('10-games')) {
-        newProgress.achievements.push('10-games');
-      }
-      if (isPerfect && !newProgress.achievements.includes('perfect-score')) {
-        newProgress.achievements.push('perfect-score');
-      }
-      if (newProgress.streak >= 3 && !newProgress.achievements.includes('streak-3')) {
-        newProgress.achievements.push('streak-3');
-      }
-
-      sessionStorage.setItem(PROGRESS_KEY, JSON.stringify(newProgress));
-      return newProgress;
-    });
-  };
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}px`;
@@ -210,9 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSlowAnimation,
       user,
       setUser,
-      speak,
-      progress,
-      recordGameCompletion
+      speak
     }}>
       {children}
     </AppContext.Provider>

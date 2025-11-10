@@ -23,7 +23,7 @@ import type { GameModeId } from "@shared/types/gameTypes";
 
 export default function QuizPage() {
   const [, setLocation] = useLocation();
-  const { language, slowAnimation, recordGameCompletion } = useApp();
+  const { language, slowAnimation } = useApp();
   const [quizMode, setQuizMode] = useState<GameModeId | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -63,14 +63,11 @@ export default function QuizPage() {
     setScore(newScore);
     setAnsweredCount(newAnsweredCount);
 
-    setTimeout(async () => {
+    setTimeout(() => {
       if (currentQuestion < shuffledQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         setShowResults(true);
-        if (quizMode) {
-          await recordGameCompletion(quizMode, newScore, shuffledQuestions.length);
-        }
         if (newScore === shuffledQuestions.length) {
           CelebrationService.celebrate('perfect-score');
         } else {
@@ -89,15 +86,12 @@ export default function QuizPage() {
     setScore(newScore);
     setAnsweredCount(answeredCount + 1);
 
-    setTimeout(async () => {
+    setTimeout(() => {
       if (currentQuestion < spotScams.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         const finalScore = newScore + (correct ? 1 : 0);
         setShowResults(true);
-        if (quizMode) {
-          await recordGameCompletion(quizMode, finalScore, spotScams.length);
-        }
         if (finalScore === spotScams.length) {
           CelebrationService.celebrate('perfect-score');
         } else {
@@ -107,12 +101,9 @@ export default function QuizPage() {
     }, 4000);
   };
 
-  const handleGameComplete = async (gameScore: number, total: number) => {
+  const handleGameComplete = (gameScore: number, total: number) => {
     setScore(gameScore);
     setShowResults(true);
-    if (quizMode) {
-      await recordGameCompletion(quizMode, gameScore, total);
-    }
     if (gameScore === total) {
       CelebrationService.celebrate('perfect-score');
     } else {
