@@ -15,6 +15,7 @@ interface AppContextType {
   setSlowAnimation: (enabled: boolean) => void;
   user: { name: string; initials: string } | null;
   setUser: (user: { name: string; initials: string } | null) => void;
+  speak: (text: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -26,6 +27,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [highContrast, setHighContrast] = useState(false);
   const [slowAnimation, setSlowAnimation] = useState(false);
   const [user, setUser] = useState<{ name: string; initials: string } | null>(null);
+
+  const speak = (text: string) => {
+    if (!narrationEnabled || !window.speechSynthesis) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    const voices = window.speechSynthesis.getVoices();
+    const languageMap: Record<Language, string> = {
+      en: 'en',
+      zh: 'zh-CN',
+      ms: 'ms'
+    };
+    
+    const preferredLang = languageMap[language];
+    const voice = voices.find(v => v.lang.startsWith(preferredLang));
+    
+    if (voice) {
+      utterance.voice = voice;
+    }
+    utterance.lang = preferredLang;
+    
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <AppContext.Provider value={{
@@ -40,7 +65,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       slowAnimation,
       setSlowAnimation,
       user,
-      setUser
+      setUser,
+      speak
     }}>
       {children}
     </AppContext.Provider>
