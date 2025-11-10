@@ -11,16 +11,22 @@ import {
 export default function AccessibilityToolbar() {
   const {
     narrationEnabled,
-    toggleNarration,
-    largeFontSize,
-    toggleFontSize,
+    setNarrationEnabled,
+    fontSize,
+    setFontSize,
     highContrast,
-    toggleContrast,
+    setHighContrast,
     slowAnimation,
-    toggleSlowAnimation,
+    setSlowAnimation,
     language,
     setLanguage,
   } = useApp();
+
+  const largeFontSize = fontSize > 16;
+  const toggleNarration = () => setNarrationEnabled(!narrationEnabled);
+  const toggleFontSize = () => setFontSize(largeFontSize ? 16 : 20);
+  const toggleContrast = () => setHighContrast(!highContrast);
+  const toggleSlowAnimation = () => setSlowAnimation(!slowAnimation);
 
   const languageOptions = [
     { code: 'en' as const, label: 'English' },
