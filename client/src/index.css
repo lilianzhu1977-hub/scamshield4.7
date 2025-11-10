@@ -286,3 +286,23 @@
     inset: -1px;
   }
 }
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --border: 0 0% 50%;
+  --card: 0 0% 100%;
+  --card-border: 0 0% 40%;
+  --primary: 210 100% 35%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 20%;
+}
+
+/* Slow Animation Mode */
+.slow-animation * {
+  animation-duration: calc(var(--animation-duration, 1s) * 2) !important;
+  transition-duration: calc(var(--transition-duration, 0.3s) * 2) !important;
+  animation-timing-function: linear !important;
+  transition-timing-function: linear !important;
+}

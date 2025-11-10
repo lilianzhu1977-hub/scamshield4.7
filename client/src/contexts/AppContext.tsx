@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Language } from "@shared/schema";
 
 interface AppContextType {
@@ -27,6 +27,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [highContrast, setHighContrast] = useState(false);
   const [slowAnimation, setSlowAnimation] = useState(false);
   const [user, setUser] = useState<{ name: string; initials: string } | null>(null);
+
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontSize}px`;
+  }, [fontSize]);
+
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+  }, [highContrast]);
+
+  useEffect(() => {
+    if (slowAnimation) {
+      document.documentElement.classList.add('slow-animation');
+    } else {
+      document.documentElement.classList.remove('slow-animation');
+    }
+  }, [slowAnimation]);
 
   const speak = (text: string) => {
     if (!narrationEnabled || !window.speechSynthesis) return;
