@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Language } from "@shared/schema";
 import type { GameModeId } from "@shared/types/gameTypes";
-import { queryClient } from "../pages/_app"; // Assuming queryClient is imported from _app
+import { queryClient } from "../lib/queryClient";
 
 interface GameStats {
   gamesPlayed: number;
