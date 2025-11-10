@@ -7,15 +7,21 @@ import { randomUUID } from "crypto";
 
 // Helper function to check and award achievements
 async function checkAndAwardAchievements(userId: string, language: string) {
-  const progress = await storage.getUserProgress(userId);
-  if (!progress) return;
+  try {
+    const progress = await storage.getUserProgress(userId);
+    if (!progress) return;
 
-  const existingAchievements = await storage.getUserAchievements(userId);
-  const existingIds = new Set(existingAchievements.map(a => a.achievementId));
-  
-  // Get scam reports count
-  const scamReports = await storage.getAllScamReports();
-  const userReportCount = scamReports.filter((r: any) => r.userId === userId).length;
+    const existingAchievements = await storage.getUserAchievements(userId);
+    const existingIds = new Set(existingAchievements.map(a => a.achievementId));
+    
+    // Get scam reports count with fallback
+    let userReportCount = 0;
+    try {
+      const scamReports = await storage.getAllScamReports();
+      userReportCount = scamReports.filter((r: any) => r.userId === userId).length;
+    } catch (reportError) {
+      console.error('Failed to get scam reports for achievement check:', reportError);
+    }
 
   for (const def of achievementDefinitions) {
     if (existingIds.has(def.id)) continue; // Already earned
@@ -49,6 +55,10 @@ async function checkAndAwardAchievements(userId: string, language: string) {
         icon: def.icon
       });
     }
+  }
+  } catch (error) {
+    console.error('Error in checkAndAwardAchievements:', error);
+    // Don't throw, just log - achievements are not critical
   }
 }
 
@@ -173,7 +183,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Check and award achievements
-        await checkAndAwardAchievements(user.id, language);
+        try {
+          await checkAndAwardAchievements(user.id, language);
+        } catch (achError) {
+          console.error('Achievement check failed:', achError);
+        }
       }
       
       res.json(attempt);
@@ -215,7 +229,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Check and award achievements
-        await checkAndAwardAchievements(user.id, language);
+        try {
+          await checkAndAwardAchievements(user.id, language);
+        } catch (achError) {
+          console.error('Achievement check failed:', achError);
+        }
       }
       
       res.json(attempt);
@@ -236,7 +254,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(reports);
     } catch (error) {
       console.error('Get scam reports error:', error);
-      res.status(500).json({ error: 'Failed to get scam reports' });
+      // Return empty array if database is unavailable instead of error
+      res.json([]);
     }
   });
 
@@ -260,12 +279,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const report = await storage.createScamReport(validatedData);
 
       // Check and award achievements including community hero
-      await checkAndAwardAchievements(user.id, language);
+      try {
+        await checkAndAwardAchievements(user.id, language);
+      } catch (achError) {
+        console.error('Achievement check failed:', achError);
+      }
       
       res.json(report);
     } catch (error) {
       console.error('Create scam report error:', error);
-      res.status(400).json({ error: 'Failed to create scam report' });
+      res.status(500).json({ error: 'Failed to create scam report' });
     }
   });
 
