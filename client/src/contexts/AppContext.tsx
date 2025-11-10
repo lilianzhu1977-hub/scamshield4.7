@@ -1,7 +1,7 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Language } from "@shared/schema";
 import type { GameModeId } from "@shared/types/gameTypes";
+import { queryClient } from "../pages/_app"; // Assuming queryClient is imported from _app
 
 interface GameStats {
   gamesPlayed: number;
@@ -67,13 +67,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const recordGameCompletion = (gameMode: GameModeId, score: number, total: number) => {
+  const recordGameCompletion = async (gameMode: GameModeId, score: number, total: number) => {
+    // Submit quiz attempt to server
+    try {
+      const username = sessionStorage.getItem('scamshield_username');
+      const displayName = sessionStorage.getItem('scamshield_displayName');
+
+      if (username && displayName) {
+        await fetch(`/api/quiz/attempt?language=${language}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            displayName,
+            questionId: `${gameMode}-${Date.now()}`,
+            selectedAnswer: score.toString(),
+            isCorrect: score === total,
+            timeSpent: 0
+          })
+        });
+
+        // Invalidate progress and achievements queries to refetch
+        queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
+      }
+    } catch (error) {
+      console.error('Failed to submit quiz attempt:', error);
+    }
+
     setProgress(prev => {
-      const today = new Date().toDateString();
-      const isConsecutiveDay = prev.lastPlayDate && 
-        new Date(prev.lastPlayDate).toDateString() !== today &&
-        Math.abs(new Date(today).getTime() - new Date(prev.lastPlayDate).getTime()) < 2 * 24 * 60 * 60 * 1000;
-      
       const currentStats = prev.gameStats[gameMode] || {
         gamesPlayed: 0,
         totalScore: 0,
@@ -81,6 +103,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         bestScore: 0,
         lastPlayed: ''
       };
+
+      const today = new Date().toISOString().split('T')[0];
+      const lastPlay = prev.lastPlayDate;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const isConsecutiveDay = lastPlay === yesterday || lastPlay === today;
+
 
       const isPerfect = score === total;
       const newStats: GameStats = {
@@ -142,25 +170,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const speak = (text: string) => {
     if (!narrationEnabled || !window.speechSynthesis) return;
-    
+
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    
+
     const voices = window.speechSynthesis.getVoices();
     const languageMap: Record<Language, string> = {
       en: 'en',
       zh: 'zh-CN',
       ms: 'ms'
     };
-    
+
     const preferredLang = languageMap[language];
     const voice = voices.find(v => v.lang.startsWith(preferredLang));
-    
+
     if (voice) {
       utterance.voice = voice;
     }
     utterance.lang = preferredLang;
-    
+
     window.speechSynthesis.speak(utterance);
   };
 

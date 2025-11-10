@@ -52,7 +52,7 @@ export default function QuizPage() {
     setQuizMode(null);
   }, [language]);
 
-  const handleTraditionalQuizAnswer = (isCorrect: boolean) => {
+  const handleTraditionalQuizAnswer = async (isCorrect: boolean) => {
     if (isCorrect) {
       CelebrationService.celebrate('correct');
     }
@@ -63,13 +63,13 @@ export default function QuizPage() {
     setScore(newScore);
     setAnsweredCount(newAnsweredCount);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < shuffledQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         setShowResults(true);
         if (quizMode) {
-          recordGameCompletion(quizMode, newScore, shuffledQuestions.length);
+          await recordGameCompletion(quizMode, newScore, shuffledQuestions.length);
         }
         if (newScore === shuffledQuestions.length) {
           CelebrationService.celebrate('perfect-score');
@@ -80,7 +80,7 @@ export default function QuizPage() {
     }, 2000);
   };
 
-  const handleSpotScamAnswer = (correct: boolean) => {
+  const handleSpotScamAnswer = async (correct: boolean) => {
     if (correct) {
       CelebrationService.celebrate('correct');
     }
@@ -89,14 +89,14 @@ export default function QuizPage() {
     setScore(newScore);
     setAnsweredCount(answeredCount + 1);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < spotScams.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         const finalScore = newScore + (correct ? 1 : 0);
         setShowResults(true);
         if (quizMode) {
-          recordGameCompletion(quizMode, finalScore, spotScams.length);
+          await recordGameCompletion(quizMode, finalScore, spotScams.length);
         }
         if (finalScore === spotScams.length) {
           CelebrationService.celebrate('perfect-score');
@@ -107,11 +107,11 @@ export default function QuizPage() {
     }, 4000);
   };
 
-  const handleGameComplete = (gameScore: number, total: number) => {
+  const handleGameComplete = async (gameScore: number, total: number) => {
     setScore(gameScore);
     setShowResults(true);
     if (quizMode) {
-      recordGameCompletion(quizMode, gameScore, total);
+      await recordGameCompletion(quizMode, gameScore, total);
     }
     if (gameScore === total) {
       CelebrationService.celebrate('perfect-score');

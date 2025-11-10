@@ -47,21 +47,71 @@ export default function QuizCard({
     }
   });
 
-  const handleAnswer = (index: number) => {
+  const handleAnswer = async (index: number) => {
     if (showResult) return;
 
     setSelectedIndex(index);
     setShowResult(true);
 
     const isCorrect = index === newCorrectIndex; // Use newCorrectIndex for shuffled options
+    
+    // Submit to server
+    try {
+      const username = sessionStorage.getItem('scamshield_username');
+      const displayName = sessionStorage.getItem('scamshield_displayName');
+      const language = sessionStorage.getItem('scamshield_language') || 'en';
+      
+      if (username && displayName) {
+        await fetch(`/api/quiz/attempt?language=${language}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            displayName,
+            questionId: question,
+            selectedAnswer: shuffledOptions[index]?.text || options[index],
+            isCorrect,
+            timeSpent: 0
+          })
+        });
+      }
+    } catch (error) {
+      console.error('Failed to submit quiz answer:', error);
+    }
+    
     onAnswer(isCorrect);
   };
 
-  const handleFillBlankSubmit = () => {
+  const handleFillBlankSubmit = async () => {
     if (showResult || !fillAnswer.trim()) return;
 
     setShowResult(true);
     const isCorrect = fillAnswer.trim().toLowerCase() === (correctAnswer || options[correctIndex]).toLowerCase();
+    
+    // Submit to server
+    try {
+      const username = sessionStorage.getItem('scamshield_username');
+      const displayName = sessionStorage.getItem('scamshield_displayName');
+      const language = sessionStorage.getItem('scamshield_language') || 'en';
+      
+      if (username && displayName) {
+        await fetch(`/api/quiz/attempt?language=${language}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username,
+            displayName,
+            questionId: question,
+            selectedAnswer: fillAnswer,
+            isCorrect,
+            timeSpent: 0
+          })
+        });
+      }
+    } catch (error) {
+      console.error('Failed to submit quiz answer:', error);
+    }
+    
     onAnswer(isCorrect);
 
     // Auto-select the correct option for visual feedback if it's a fill-blank type
