@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { getAIResponse, analyzeScamRisk } from "./openai";
 import { insertUserSchema, insertQuizAttemptSchema, insertSimulationAttemptSchema, insertScamReportSchema } from "@shared/schema";
 import { achievementDefinitions } from "@shared/data/achievements";
 import { randomUUID } from "crypto";
@@ -83,56 +82,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return user;
   };
 
-  // AI Chat endpoint
-  app.post('/api/chat', async (req, res) => {
-    try {
-      const { message, language = 'en', username, displayName } = req.body;
-      
-      if (!message || !username || !displayName) {
-        return res.status(400).json({ error: 'Message, username, and displayName are required' });
-      }
-
-      const user = await getOrCreateSessionUser(username, displayName, language);
-      const progress = await storage.getUserProgress(user.id);
-      
-      // Get recent chat history
-      const history = await storage.getUserChatHistory(user.id, 10);
-      const conversationHistory = history.reverse().map(msg => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content
-      }));
-
-      // Get AI response
-      const aiResponse = await getAIResponse(message, {
-        language,
-        userProgress: progress ? {
-          level: progress.level,
-          weakAreas: progress.weakAreas,
-          strongAreas: progress.strongAreas
-        } : undefined
-      }, conversationHistory);
-
-      // Save messages
-      await storage.createChatMessage({
-        userId: user.id,
-        role: 'user',
-        content: message,
-        language
-      });
-
-      await storage.createChatMessage({
-        userId: user.id,
-        role: 'assistant',
-        content: aiResponse,
-        language
-      });
-
-      res.json({ response: aiResponse });
-    } catch (error) {
-      console.error('Chat error:', error);
-      res.status(500).json({ error: 'Failed to process chat message' });
-    }
-  });
 
   // Get user progress
   app.get('/api/progress', async (req, res) => {
@@ -331,22 +280,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Analyze scam risk (AI-powered)
-  app.post('/api/analyze-scam', async (req, res) => {
-    try {
-      const { description, language = 'en' } = req.body;
-      
-      if (!description) {
-        return res.status(400).json({ error: 'Description is required' });
-      }
-
-      const analysis = await analyzeScamRisk(description, language);
-      res.json(analysis);
-    } catch (error) {
-      console.error('Scam analysis error:', error);
-      res.status(500).json({ error: 'Failed to analyze scam' });
-    }
-  });
 
   // Update video watched
   app.post('/api/progress/video-watched', async (req, res) => {

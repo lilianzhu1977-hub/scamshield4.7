@@ -10,7 +10,6 @@ import { Bot, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
 import AccessibilityToolbar from "@/components/AccessibilityToolbar";
-import ChatAssistant from "@/components/ChatAssistant";
 import LoginPrompt from "@/components/LoginPrompt";
 import HomePage from "@/pages/HomePage";
 import LearnPage from "@/pages/LearnPage";
@@ -46,7 +45,6 @@ function Router() {
 function AppContent() {
   const { language, setLanguage, user, setUser } = useApp();
   const [showLanguageSelector, setShowLanguageSelector] = useState(true);
-  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('scamshield-language');
