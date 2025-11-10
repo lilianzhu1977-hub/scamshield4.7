@@ -5,11 +5,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider, useApp } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
-import { Bot } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Bot, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import LanguageSelector from "@/components/LanguageSelector";
 import AccessibilityToolbar from "@/components/AccessibilityToolbar";
 import ChatAssistant from "@/components/ChatAssistant";
+import LoginPrompt from "@/components/LoginPrompt";
 import HomePage from "@/pages/HomePage";
 import LearnPage from "@/pages/LearnPage";
 import VideosPage from "@/pages/VideosPage";
@@ -20,7 +22,6 @@ import TipsPage from "@/pages/TipsPage";
 import NewsPage from "@/pages/NewsPage";
 import ProgressPage from "@/pages/ProgressPage";
 import CommunityPage from "@/pages/CommunityPage";
-import FamilyViewPage from "@/pages/FamilyViewPage";
 import NotFound from "@/pages/not-found";
 import { translations } from "@/lib/translations";
 
@@ -37,24 +38,29 @@ function Router() {
       <Route path="/news" component={NewsPage} />
       <Route path="/progress" component={ProgressPage} />
       <Route path="/community" component={CommunityPage} />
-      <Route path="/family" component={FamilyViewPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function AppContent() {
-  const { language, setLanguage } = useApp();
+  const { language, setLanguage, user, setUser } = useApp();
   const [showLanguageSelector, setShowLanguageSelector] = useState(true);
   const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('scamshield-language');
+    const savedUser = localStorage.getItem('scamshield-user');
+    
     if (savedLanguage) {
       setLanguage(savedLanguage as 'en' | 'zh' | 'ms');
       setShowLanguageSelector(false);
     }
-  }, [setLanguage]);
+    
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, [setLanguage, setUser]);
 
   const handleLanguageSelected = (lang: 'en' | 'zh' | 'ms') => {
     setLanguage(lang);
@@ -62,13 +68,20 @@ function AppContent() {
     setShowLanguageSelector(false);
   };
 
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('scamshield-user');
+  };
+
   return (
     <>
-      {showLanguageSelector && (
+      {!user && <LoginPrompt />}
+      
+      {showLanguageSelector && user && (
         <LanguageSelector onLanguageSelected={handleLanguageSelected} />
       )}
 
-      {!showLanguageSelector && (
+      {!showLanguageSelector && user && (
         <>
           <header className="sticky top-0 z-40 bg-background border-b">
             <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -82,7 +95,27 @@ function AppContent() {
                   {language === 'ms' && 'Pencegahan Penipuan untuk Warga Emas'}
                 </p>
               </div>
-              <AccessibilityToolbar />
+              <div className="flex items-center gap-4">
+                <AccessibilityToolbar />
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white font-semibold">
+                      {user.initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden sm:block">
+                    <p className="text-sm font-medium">{user.name}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleLogout}
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </header>
 
