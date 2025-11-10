@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { ChevronLeft, Phone, MessageSquare, Mail, Shield, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import ScamTypeCard from "@/components/ScamTypeCard";
 import { useApp } from "@/contexts/AppContext";
 import { scamTypes as scamTypesData } from "@shared/data/content";
 import { getText } from "@/lib/translations";
+import { Badge } from "@/components/ui/badge";
 
 export default function LearnPage() {
   const [, setLocation] = useLocation();
@@ -17,6 +19,137 @@ export default function LearnPage() {
     story: getText(scam.story, language),
     testId: `card-scam-${scam.id}`
   }));
+
+  const actionScenarios = [
+    {
+      icon: Phone,
+      title: language === 'zh' ? '接到诈骗电话时' : language === 'ms' ? 'Ketika Terima Panggilan Penipuan' : 'When You Get a Scam Call',
+      color: 'text-red-500',
+      bgColor: 'bg-red-50',
+      steps: language === 'zh' 
+        ? [
+            '不要回答任何问题',
+            '立即挂断电话',
+            '不要按任何按键',
+            '屏蔽号码',
+            '向ScamShield举报 (1799)',
+            '警告：骗子可以用AI复制你的声音！说话要小心'
+          ]
+        : language === 'ms'
+        ? [
+            'Jangan jawab sebarang soalan',
+            'Tutup telefon segera',
+            'Jangan tekan apa-apa butang',
+            'Sekat nombor',
+            'Laporkan ke ScamShield (1799)',
+            'Amaran: Penipu boleh guna AI salin suara anda! Berhati-hati'
+          ]
+        : [
+            'Don\'t answer any questions',
+            'Hang up immediately',
+            'Don\'t press any buttons',
+            'Block the number',
+            'Report to ScamShield (1799)',
+            'Warning: Scammers can use AI to copy your voice! Be careful what you say'
+          ]
+    },
+    {
+      icon: MessageSquare,
+      title: language === 'zh' ? '收到诈骗短信时' : language === 'ms' ? 'Ketika Terima SMS Penipuan' : 'When You Get a Scam SMS',
+      color: 'text-orange-500',
+      bgColor: 'bg-orange-50',
+      steps: language === 'zh'
+        ? [
+            '不要点击任何链接',
+            '不要回复短信',
+            '删除消息',
+            '截图保存证据',
+            '向ScamShield举报',
+            '检查官方应用/网站'
+          ]
+        : language === 'ms'
+        ? [
+            'Jangan klik sebarang pautan',
+            'Jangan balas SMS',
+            'Padam mesej',
+            'Screenshot untuk bukti',
+            'Laporkan ke ScamShield',
+            'Semak aplikasi/laman web rasmi'
+          ]
+        : [
+            'Don\'t click any links',
+            'Don\'t reply to the message',
+            'Delete the message',
+            'Screenshot for evidence',
+            'Report to ScamShield',
+            'Check official app/website'
+          ]
+    },
+    {
+      icon: Mail,
+      title: language === 'zh' ? '收到诈骗邮件时' : language === 'ms' ? 'Ketika Terima Email Penipuan' : 'When You Get a Scam Email',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50',
+      steps: language === 'zh'
+        ? [
+            '检查发件人地址',
+            '不要下载附件',
+            '不要点击链接',
+            '标记为垃圾邮件',
+            '向公司官方举报',
+            '通知IT部门（如果是工作邮箱）'
+          ]
+        : language === 'ms'
+        ? [
+            'Semak alamat pengirim',
+            'Jangan muat turun lampiran',
+            'Jangan klik pautan',
+            'Tandakan sebagai spam',
+            'Laporkan ke syarikat rasmi',
+            'Beritahu jabatan IT (jika email kerja)'
+          ]
+        : [
+            'Check sender address',
+            'Don\'t download attachments',
+            'Don\'t click links',
+            'Mark as spam',
+            'Report to official company',
+            'Notify IT department (if work email)'
+          ]
+    },
+    {
+      icon: Shield,
+      title: language === 'zh' ? '怀疑手机被控制时' : language === 'ms' ? 'Jika Syak Telefon Dikawal' : 'If You Suspect Phone is Compromised',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50',
+      steps: language === 'zh'
+        ? [
+            '立即开启飞行模式',
+            '关闭手机',
+            '不要输入任何密码',
+            '联系银行冻结账户',
+            '前往授权服务中心',
+            '报警 (999)'
+          ]
+        : language === 'ms'
+        ? [
+            'Hidupkan mod pesawat segera',
+            'Matikan telefon',
+            'Jangan masukkan kata laluan',
+            'Hubungi bank bekukan akaun',
+            'Lawat pusat servis sah',
+            'Hubungi polis (999)'
+          ]
+        : [
+            'Turn on airplane mode immediately',
+            'Power off phone',
+            'Don\'t enter any passwords',
+            'Contact bank to freeze accounts',
+            'Visit authorized service center',
+            'Call police (999)'
+          ]
+    }
+  ];
 
   const oldScamTypes = [
     {
@@ -97,6 +230,74 @@ export default function LearnPage() {
         </p>
       </div>
 
+      {/* What to Do Section */}
+      <div className="mb-12">
+        <div className="flex items-center gap-2 mb-6">
+          <AlertTriangle className="w-6 h-6 text-primary" />
+          <h2 className="text-3xl font-bold">
+            {language === 'zh' ? '遇到诈骗怎么办？' : language === 'ms' ? 'Apa Yang Perlu Buat?' : 'What to Do When Scammed?'}
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {actionScenarios.map((scenario, index) => (
+            <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`p-3 rounded-lg ${scenario.bgColor}`}>
+                  <scenario.icon className={`w-6 h-6 ${scenario.color}`} />
+                </div>
+                <h3 className="text-xl font-bold">{scenario.title}</h3>
+              </div>
+              <div className="space-y-2">
+                {scenario.steps.map((step, stepIndex) => (
+                  <div key={stepIndex} className="flex items-start gap-2">
+                    <Badge variant="outline" className="mt-0.5 shrink-0">
+                      {stepIndex + 1}
+                    </Badge>
+                    <p className="text-sm">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Voice Warning Banner */}
+      <Card className="p-6 mb-12 bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
+        <div className="flex items-start gap-4">
+          <AlertTriangle className="w-8 h-8 text-red-500 shrink-0 mt-1" />
+          <div>
+            <h3 className="text-xl font-bold text-red-700 mb-2">
+              {language === 'zh' ? '⚠️ AI语音诈骗警告' : language === 'ms' ? '⚠️ Amaran Penipuan Suara AI' : '⚠️ AI Voice Scam Warning'}
+            </h3>
+            <p className="text-red-800 mb-2">
+              {language === 'zh' 
+                ? '骗子现在可以使用人工智能技术复制你的声音！他们只需要短短3秒的录音。'
+                : language === 'ms'
+                ? 'Penipu kini boleh guna teknologi AI untuk salin suara anda! Mereka hanya perlukan 3 saat rakaman.'
+                : 'Scammers can now use AI technology to clone your voice! They only need 3 seconds of audio.'}
+            </p>
+            <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+              <li>
+                {language === 'zh' ? '不要在不明电话中说"是"或"好"' : language === 'ms' ? 'Jangan kata "ya" atau "ok" dalam panggilan tak dikenali' : 'Never say "yes" or "okay" in unknown calls'}
+              </li>
+              <li>
+                {language === 'zh' ? '与家人设定暗号确认身份' : language === 'ms' ? 'Tetapkan kod rahsia dengan keluarga' : 'Set up secret codes with family'}
+              </li>
+              <li>
+                {language === 'zh' ? '总是用视频通话确认紧急请求' : language === 'ms' ? 'Sentiasa guna video call untuk sahkan permintaan kecemasan' : 'Always use video calls to verify emergency requests'}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </Card>
+
+      {/* Scam Types Section */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold mb-6">
+          {language === 'zh' ? '常见诈骗类型' : language === 'ms' ? 'Jenis Penipuan Biasa' : 'Common Scam Types'}
+        </h2>
+      </div>
       <div className="space-y-6">
         {scamTypes.map((scam) => (
           <ScamTypeCard

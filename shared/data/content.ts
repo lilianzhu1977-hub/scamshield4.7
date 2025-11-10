@@ -468,6 +468,120 @@ export const quizQuestions = [
       zh: "ACT代表：如有疑问就提问，与官方来源核实，向警察或家人告知可疑活动。这三步法可以帮助你防范诈骗。",
       ms: "ACT bermaksud: Tanya soalan jika tidak pasti, Semak dengan sumber rasmi, Beritahu polis atau keluarga tentang aktiviti mencurigakan. Pendekatan tiga langkah ini membantu melindungi anda dari penipuan."
     }
+  },
+  {
+    id: 'q11',
+    language: 'en',
+    type: 'true-false',
+    question: {
+      en: "TRUE or FALSE: Banks will sometimes ask for your OTP over the phone to verify your identity.",
+      zh: "对或错：银行有时会通过电话要求你的验证码来验证身份。",
+      ms: "BENAR atau SALAH: Bank kadang-kadang akan minta OTP anda melalui telefon untuk sahkan identiti."
+    },
+    options: [
+      { en: "True", zh: "对", ms: "Benar" },
+      { en: "False", zh: "错", ms: "Salah" }
+    ],
+    correctIndex: 1,
+    explanation: {
+      en: "FALSE! Banks NEVER ask for your OTP. Anyone asking for it is a scammer trying to access your account.",
+      zh: "错！银行绝不会要求你的验证码。任何索要验证码的人都是试图访问你账户的骗子。",
+      ms: "SALAH! Bank TIDAK PERNAH minta OTP anda. Sesiapa yang meminta adalah penipu cuba akses akaun anda."
+    }
+  },
+  {
+    id: 'q12',
+    language: 'en',
+    type: 'true-false',
+    question: {
+      en: "TRUE or FALSE: Scammers can use AI to clone your voice from a 3-second recording.",
+      zh: "对或错：骗子可以用AI从3秒录音中复制你的声音。",
+      ms: "BENAR atau SALAH: Penipu boleh guna AI untuk salin suara anda dari rakaman 3 saat."
+    },
+    options: [
+      { en: "True", zh: "对", ms: "Benar" },
+      { en: "False", zh: "错", ms: "Salah" }
+    ],
+    correctIndex: 0,
+    explanation: {
+      en: "TRUE! Modern AI can clone voices from very short recordings. Be careful what you say on unknown calls!",
+      zh: "对！现代AI可以从很短的录音中复制声音。在不明电话中说话要小心！",
+      ms: "BENAR! AI moden boleh salin suara dari rakaman sangat pendek. Berhati-hati apa yang anda kata dalam panggilan tak dikenali!"
+    }
+  },
+  {
+    id: 'q13',
+    language: 'en',
+    type: 'fill-blank',
+    question: {
+      en: "If someone claims to be from the police asking for money, you should hang up and call back using the _______ number.",
+      zh: "如果有人声称是警察要钱，你应该挂断并用_______号码回拨。",
+      ms: "Jika seseorang mendakwa dari polis minta wang, anda patut tutup dan hubungi semula menggunakan nombor _______."
+    },
+    options: [
+      { en: "same", zh: "相同的", ms: "sama" },
+      { en: "official", zh: "官方", ms: "rasmi" },
+      { en: "emergency", zh: "紧急", ms: "kecemasan" },
+      { en: "private", zh: "私人", ms: "peribadi" }
+    ],
+    correctIndex: 1,
+    correctAnswer: {
+      en: "official",
+      zh: "官方",
+      ms: "rasmi"
+    },
+    explanation: {
+      en: "Always hang up and call back using the OFFICIAL number found on the organization's website, not the number they give you.",
+      zh: "务必挂断并使用机构网站上的官方号码回拨，而不是他们给你的号码。",
+      ms: "Sentiasa tutup dan hubungi semula menggunakan nombor RASMI yang terdapat di laman web organisasi, bukan nombor yang mereka berikan."
+    }
+  },
+  {
+    id: 'q14',
+    language: 'en',
+    type: 'true-false',
+    question: {
+      en: "TRUE or FALSE: If a deal sounds too good to be true, it probably is a scam.",
+      zh: "对或错：如果一个交易好到不真实，它很可能就是诈骗。",
+      ms: "BENAR atau SALAH: Jika tawaran kedengaran terlalu baik untuk menjadi kenyataan, ia mungkin penipuan."
+    },
+    options: [
+      { en: "True", zh: "对", ms: "Benar" },
+      { en: "False", zh: "错", ms: "Salah" }
+    ],
+    correctIndex: 0,
+    explanation: {
+      en: "TRUE! This is a golden rule. Unrealistic promises of easy money, high returns, or amazing deals are red flags.",
+      zh: "对！这是黄金法则。轻松赚钱、高回报或惊人交易的不切实际承诺都是危险信号。",
+      ms: "BENAR! Ini adalah peraturan emas. Janji tidak realistik wang mudah, pulangan tinggi, atau tawaran menakjubkan adalah tanda bahaya."
+    }
+  },
+  {
+    id: 'q15',
+    language: 'en',
+    type: 'fill-blank',
+    question: {
+      en: "The Singapore Anti-Scam Helpline number is _______.",
+      zh: "新加坡反诈骗热线号码是_______。",
+      ms: "Nombor Talian Anti-Penipuan Singapura ialah _______."
+    },
+    options: [
+      { en: "999", zh: "999", ms: "999" },
+      { en: "1800-722-6688", zh: "1800-722-6688", ms: "1800-722-6688" },
+      { en: "995", zh: "995", ms: "995" },
+      { en: "1800-255-0000", zh: "1800-255-0000", ms: "1800-255-0000" }
+    ],
+    correctIndex: 1,
+    correctAnswer: {
+      en: "1800-722-6688",
+      zh: "1800-722-6688",
+      ms: "1800-722-6688"
+    },
+    explanation: {
+      en: "The Anti-Scam Helpline is 1800-722-6688. Call this number to report scams or get help. For emergencies, call 999.",
+      zh: "反诈骗热线是1800-722-6688。拨打此号码举报诈骗或寻求帮助。紧急情况请拨打999。",
+      ms: "Talian Anti-Penipuan ialah 1800-722-6688. Hubungi nombor ini untuk laporkan penipuan atau dapatkan bantuan. Untuk kecemasan, hubungi 999."
+    }
   }
 ];
 

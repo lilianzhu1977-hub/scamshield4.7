@@ -257,6 +257,8 @@ export default function QuizPage() {
           options={shuffledQuestions[currentQuestion].options}
           correctIndex={shuffledQuestions[currentQuestion].correctIndex}
           explanation={shuffledQuestions[currentQuestion].explanation}
+          type={(shuffledQuestions[currentQuestion] as any).type || 'multiple-choice'}
+          correctAnswer={(shuffledQuestions[currentQuestion] as any).correctAnswer}
           onAnswer={(isCorrect) => {
             const newScore = isCorrect ? score + 1 : score;
             setScore(newScore);
