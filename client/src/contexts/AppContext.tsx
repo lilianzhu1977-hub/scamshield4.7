@@ -74,7 +74,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const displayName = sessionStorage.getItem('scamshield_displayName');
 
       if (username && displayName) {
-        await fetch(`/api/quiz/attempt?language=${language}`, {
+        const response = await fetch(`/api/quiz/attempt?language=${language}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -87,9 +87,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
           })
         });
 
+        if (!response.ok) {
+          throw new Error('Failed to submit quiz attempt');
+        }
+
         // Invalidate progress and achievements queries to refetch
-        queryClient.invalidateQueries({ queryKey: ['/api/progress'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/achievements'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/progress', language] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/achievements', language] });
       }
     } catch (error) {
       console.error('Failed to submit quiz attempt:', error);

@@ -56,7 +56,7 @@ export default function QuizPage() {
     if (isCorrect) {
       CelebrationService.celebrate('correct');
     }
-    
+
     const newScore = isCorrect ? score + 1 : score;
     const newAnsweredCount = answeredCount + 1;
 
@@ -84,7 +84,7 @@ export default function QuizPage() {
     if (correct) {
       CelebrationService.celebrate('correct');
     }
-    
+
     const newScore = correct ? score + 1 : score;
     setScore(newScore);
     setAnsweredCount(answeredCount + 1);
@@ -180,7 +180,7 @@ export default function QuizPage() {
               const questionCount = mode.id === 'traditional' ? shuffledQuestions.length :
                                    mode.id === 'spot-scam' ? spotScams.length :
                                    mode.totalQuestions;
-              
+
               return (
                 <Card 
                   key={mode.id}
