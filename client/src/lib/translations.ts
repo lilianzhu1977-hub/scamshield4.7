@@ -85,6 +85,11 @@ export const translations = {
       en: "Scam News",
       zh: "诈骗新闻",
       ms: "Berita Penipuan"
+    },
+    family: {
+      en: "Family View",
+      zh: "家庭视图",
+      ms: "Pandangan Keluarga"
     }
   },
   accessibility: {
