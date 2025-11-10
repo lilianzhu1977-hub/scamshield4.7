@@ -7,20 +7,41 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
+const API_BASE = import.meta.env.DEV ? 'http://localhost:5000' : '';
+
+export async function apiRequest(method: string, url: string, body?: any) {
+  // Get user data from localStorage
+  const userDataStr = localStorage.getItem('scamshield-user');
+  const userData = userDataStr ? JSON.parse(userDataStr) : null;
+
+  // Add user data to body for POST requests or URL params for GET requests
+  let finalUrl = url;
+  let finalBody = body;
+
+  if (userData) {
+    if (method === 'GET') {
+      const urlObj = new URL(`${API_BASE}${url}`, window.location.origin);
+      urlObj.searchParams.set('username', userData.name);
+      urlObj.searchParams.set('displayName', userData.name);
+      finalUrl = urlObj.pathname + urlObj.search;
+    } else if (body) {
+      finalBody = {
+        ...body,
+        username: userData.name,
+        displayName: userData.name
+      };
+    }
+  }
+
+  const response = await fetch(`${API_BASE}${finalUrl}`, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers: finalBody ? { 'Content-Type': 'application/json' } : {},
+    body: finalBody ? JSON.stringify(finalBody) : undefined,
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
-  return res;
+  await throwIfResNotOk(response);
+  return response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";

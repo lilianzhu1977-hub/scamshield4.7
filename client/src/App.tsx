@@ -51,12 +51,12 @@ function AppContent() {
   useEffect(() => {
     const savedLanguage = localStorage.getItem('scamshield-language');
     const savedUser = localStorage.getItem('scamshield-user');
-    
+
     if (savedLanguage) {
       setLanguage(savedLanguage as 'en' | 'zh' | 'ms');
       setShowLanguageSelector(false);
     }
-    
+
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -76,10 +76,6 @@ function AppContent() {
   return (
     <>
       {!user && <LoginPrompt />}
-      
-      {showLanguageSelector && user && (
-        <LanguageSelector onLanguageSelected={handleLanguageSelected} />
-      )}
 
       {!showLanguageSelector && user && (
         <>
@@ -122,18 +118,10 @@ function AppContent() {
           <main className="min-h-screen pb-24">
             <Router />
           </main>
-
-          <Button
-            data-testid="button-open-chat"
-            size="icon"
-            className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-lg z-40"
-            onClick={() => setShowChat(!showChat)}
-          >
-            <Bot className="w-8 h-8" />
-          </Button>
-
-          <ChatAssistant isOpen={showChat} onClose={() => setShowChat(false)} />
         </>
+      )}
+      {showLanguageSelector && user && (
+        <LanguageSelector onLanguageSelected={handleLanguageSelected} />
       )}
     </>
   );

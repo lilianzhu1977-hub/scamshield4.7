@@ -55,15 +55,14 @@ async function checkAndAwardAchievements(userId: string, language: string) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Session user ID (for demo purposes - in production would use authentication)
-  const getOrCreateSessionUser = async (language: string = 'en') => {
-    const sessionUsername = 'demo_user';
-    let user = await storage.getUserByUsername(sessionUsername);
+  // Get or create user by username
+  const getOrCreateSessionUser = async (username: string, displayName: string, language: string = 'en') => {
+    let user = await storage.getUserByUsername(username);
     
     if (!user) {
       user = await storage.createUser({
-        username: sessionUsername,
-        displayName: 'Demo User',
+        username: username,
+        displayName: displayName,
         language: language as any,
       });
       
@@ -87,13 +86,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Chat endpoint
   app.post('/api/chat', async (req, res) => {
     try {
-      const { message, language = 'en' } = req.body;
+      const { message, language = 'en', username, displayName } = req.body;
       
-      if (!message) {
-        return res.status(400).json({ error: 'Message is required' });
+      if (!message || !username || !displayName) {
+        return res.status(400).json({ error: 'Message, username, and displayName are required' });
       }
 
-      const user = await getOrCreateSessionUser(language);
+      const user = await getOrCreateSessionUser(username, displayName, language);
       const progress = await storage.getUserProgress(user.id);
       
       // Get recent chat history
@@ -139,7 +138,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/progress', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const username = req.query.username as string;
+      const displayName = req.query.displayName as string;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       let progress = await storage.getUserProgress(user.id);
       
       // Ensure progress always exists
@@ -168,7 +174,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/achievements', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const username = req.query.username as string;
+      const displayName = req.query.displayName as string;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       const achievements = await storage.getUserAchievements(user.id);
       
       res.json(achievements);
@@ -182,7 +195,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/quiz/attempt', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const { username, displayName } = req.body;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       
       const validatedData = insertQuizAttemptSchema.parse({
         ...req.body,
@@ -219,7 +238,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/simulation/attempt', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const { username, displayName } = req.body;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       
       const validatedData = insertSimulationAttemptSchema.parse({
         ...req.body,
@@ -270,7 +295,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/scam-reports', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const { username, displayName } = req.body;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       
       const validatedData = insertScamReportSchema.parse({
         ...req.body,
@@ -321,7 +352,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/progress/video-watched', async (req, res) => {
     try {
       const language = (req.query.language as string) || 'en';
-      const user = await getOrCreateSessionUser(language);
+      const { username, displayName } = req.body;
+      
+      if (!username || !displayName) {
+        return res.status(400).json({ error: 'Username and displayName are required' });
+      }
+      
+      const user = await getOrCreateSessionUser(username, displayName, language);
       const progress = await storage.getUserProgress(user.id);
       
       if (progress) {
