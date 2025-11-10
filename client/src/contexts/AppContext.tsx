@@ -1,6 +1,23 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { Language } from "@shared/schema";
+import type { GameModeId } from "@shared/types/gameTypes";
+
+interface GameStats {
+  gamesPlayed: number;
+  totalScore: number;
+  perfectScores: number;
+  bestScore: number;
+  lastPlayed: string;
+}
+
+interface ProgressData {
+  totalGamesPlayed: number;
+  gameStats: Partial<Record<GameModeId, GameStats>>;
+  achievements: string[];
+  streak: number;
+  lastPlayDate: string;
+}
 
 interface AppContextType {
   language: Language;
@@ -16,9 +33,13 @@ interface AppContextType {
   user: { name: string; initials: string } | null;
   setUser: (user: { name: string; initials: string } | null) => void;
   speak: (text: string) => void;
+  progress: ProgressData;
+  recordGameCompletion: (gameMode: GameModeId, score: number, total: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+const PROGRESS_KEY = 'scamshield_progress';
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
@@ -27,6 +48,77 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [highContrast, setHighContrast] = useState(false);
   const [slowAnimation, setSlowAnimation] = useState(false);
   const [user, setUser] = useState<{ name: string; initials: string } | null>(null);
+  const [progress, setProgress] = useState<ProgressData>({
+    totalGamesPlayed: 0,
+    gameStats: {},
+    achievements: [],
+    streak: 0,
+    lastPlayDate: ''
+  });
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(PROGRESS_KEY);
+    if (stored) {
+      try {
+        setProgress(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to load progress', e);
+      }
+    }
+  }, []);
+
+  const recordGameCompletion = (gameMode: GameModeId, score: number, total: number) => {
+    setProgress(prev => {
+      const today = new Date().toDateString();
+      const isConsecutiveDay = prev.lastPlayDate && 
+        new Date(prev.lastPlayDate).toDateString() !== today &&
+        Math.abs(new Date(today).getTime() - new Date(prev.lastPlayDate).getTime()) < 2 * 24 * 60 * 60 * 1000;
+      
+      const currentStats = prev.gameStats[gameMode] || {
+        gamesPlayed: 0,
+        totalScore: 0,
+        perfectScores: 0,
+        bestScore: 0,
+        lastPlayed: ''
+      };
+
+      const isPerfect = score === total;
+      const newStats: GameStats = {
+        gamesPlayed: currentStats.gamesPlayed + 1,
+        totalScore: currentStats.totalScore + score,
+        perfectScores: currentStats.perfectScores + (isPerfect ? 1 : 0),
+        bestScore: Math.max(currentStats.bestScore, score),
+        lastPlayed: today
+      };
+
+      const newProgress: ProgressData = {
+        totalGamesPlayed: prev.totalGamesPlayed + 1,
+        gameStats: {
+          ...prev.gameStats,
+          [gameMode]: newStats
+        },
+        achievements: [...prev.achievements],
+        streak: isConsecutiveDay ? prev.streak + 1 : 1,
+        lastPlayDate: today
+      };
+
+      if (newProgress.totalGamesPlayed === 1 && !newProgress.achievements.includes('first-game')) {
+        newProgress.achievements.push('first-game');
+      }
+      if (newProgress.totalGamesPlayed === 10 && !newProgress.achievements.includes('10-games')) {
+        newProgress.achievements.push('10-games');
+      }
+      if (isPerfect && !newProgress.achievements.includes('perfect-score')) {
+        newProgress.achievements.push('perfect-score');
+      }
+      if (newProgress.streak >= 3 && !newProgress.achievements.includes('streak-3')) {
+        newProgress.achievements.push('streak-3');
+      }
+
+      sessionStorage.setItem(PROGRESS_KEY, JSON.stringify(newProgress));
+      return newProgress;
+    });
+  };
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${fontSize}px`;
@@ -86,7 +178,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSlowAnimation,
       user,
       setUser,
-      speak
+      speak,
+      progress,
+      recordGameCompletion
     }}>
       {children}
     </AppContext.Provider>
