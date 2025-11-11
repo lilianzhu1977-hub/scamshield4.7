@@ -1,8 +1,4 @@
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
 import { randomUUID } from "crypto";
-import { eq, desc, and } from "drizzle-orm";
-import * as schema from "@shared/schema";
 import type {
   User,
   InsertUser,
@@ -55,129 +51,195 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 }
 
-class DbStorage implements IStorage {
-  private db;
-
-  constructor() {
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.db = drizzle(pool, { schema });
-  }
+class MemStorage implements IStorage {
+  private users: Map<string, User> = new Map();
+  private usersByUsername: Map<string, User> = new Map();
+  private userProgress: Map<string, UserProgress> = new Map();
+  private achievements: Map<string, Achievement[]> = new Map();
+  private quizAttempts: Map<string, QuizAttempt[]> = new Map();
+  private simulationAttempts: Map<string, SimulationAttempt[]> = new Map();
+  private scamReports: ScamReport[] = [];
+  private chatMessages: Map<string, ChatMessage[]> = new Map();
 
   async getUser(id: string): Promise<User | undefined> {
-    const result = await this.db.select().from(schema.users).where(eq(schema.users.id, id));
-    return result[0];
+    return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await this.db.select().from(schema.users).where(eq(schema.users.username, username));
-    return result[0];
+    return this.usersByUsername.get(username);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const [user] = await this.db.insert(schema.users).values({ ...insertUser, id }).returning();
+    const user: User = {
+      ...insertUser,
+      language: insertUser.language || 'en',
+      id,
+      createdAt: new Date(),
+    };
+    this.users.set(id, user);
+    this.usersByUsername.set(user.username, user);
     return user;
   }
 
   async getUserProgress(userId: string): Promise<UserProgress | undefined> {
-    const result = await this.db.select().from(schema.userProgress).where(eq(schema.userProgress.userId, userId));
-    return result[0];
+    return this.userProgress.get(userId);
   }
 
   async createUserProgress(insertProgress: InsertUserProgress): Promise<UserProgress> {
     const id = randomUUID();
-    const [progress] = await this.db.insert(schema.userProgress).values({ ...insertProgress, id }).returning();
+    const progress: UserProgress = {
+      totalScore: 0,
+      level: 1,
+      quizzesCompleted: 0,
+      simulationsCompleted: 0,
+      videosWatched: 0,
+      scamTypesLearned: [],
+      weakAreas: [],
+      strongAreas: [],
+      ...insertProgress,
+      id,
+      lastActive: new Date(),
+      updatedAt: new Date(),
+    };
+    this.userProgress.set(insertProgress.userId, progress);
     return progress;
   }
 
   async updateUserProgress(userId: string, updates: Partial<UserProgress>): Promise<UserProgress | undefined> {
-    const [progress] = await this.db
-      .update(schema.userProgress)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(schema.userProgress.userId, userId))
-      .returning();
-    return progress;
+    const existing = this.userProgress.get(userId);
+    if (!existing) return undefined;
+
+    const updated: UserProgress = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.userProgress.set(userId, updated);
+    return updated;
   }
 
   async getUserAchievements(userId: string): Promise<Achievement[]> {
-    return await this.db.select().from(schema.achievements).where(eq(schema.achievements.userId, userId));
+    return this.achievements.get(userId) || [];
   }
 
   async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
     const id = randomUUID();
-    const [achievement] = await this.db.insert(schema.achievements).values({ ...insertAchievement, id }).returning();
+    const achievement: Achievement = {
+      ...insertAchievement,
+      id,
+      earnedAt: new Date(),
+    };
+    
+    const userAchievements = this.achievements.get(insertAchievement.userId) || [];
+    userAchievements.push(achievement);
+    this.achievements.set(insertAchievement.userId, userAchievements);
+    
     return achievement;
   }
 
   async getUserQuizAttempts(userId: string): Promise<QuizAttempt[]> {
-    return await this.db.select().from(schema.quizAttempts)
-      .where(eq(schema.quizAttempts.userId, userId))
-      .orderBy(desc(schema.quizAttempts.attemptedAt));
+    const attempts = this.quizAttempts.get(userId) || [];
+    return attempts.sort((a, b) => b.attemptedAt.getTime() - a.attemptedAt.getTime());
   }
 
   async createQuizAttempt(insertAttempt: InsertQuizAttempt): Promise<QuizAttempt> {
     const id = randomUUID();
-    const [attempt] = await this.db.insert(schema.quizAttempts).values({ ...insertAttempt, id }).returning();
+    const attempt: QuizAttempt = {
+      ...insertAttempt,
+      id,
+      attemptedAt: new Date(),
+    };
+    
+    const userAttempts = this.quizAttempts.get(insertAttempt.userId) || [];
+    userAttempts.push(attempt);
+    this.quizAttempts.set(insertAttempt.userId, userAttempts);
+    
     return attempt;
   }
 
   async getQuizAttemptsByQuestion(userId: string, questionId: string): Promise<QuizAttempt[]> {
-    return await this.db.select().from(schema.quizAttempts)
-      .where(and(
-        eq(schema.quizAttempts.userId, userId),
-        eq(schema.quizAttempts.questionId, questionId)
-      ))
-      .orderBy(desc(schema.quizAttempts.attemptedAt));
+    const attempts = this.quizAttempts.get(userId) || [];
+    return attempts
+      .filter(a => a.questionId === questionId)
+      .sort((a, b) => b.attemptedAt.getTime() - a.attemptedAt.getTime());
   }
 
   async getUserSimulationAttempts(userId: string): Promise<SimulationAttempt[]> {
-    return await this.db.select().from(schema.simulationAttempts)
-      .where(eq(schema.simulationAttempts.userId, userId))
-      .orderBy(desc(schema.simulationAttempts.completedAt));
+    const attempts = this.simulationAttempts.get(userId) || [];
+    return attempts.sort((a, b) => b.completedAt.getTime() - a.completedAt.getTime());
   }
 
   async createSimulationAttempt(insertAttempt: InsertSimulationAttempt): Promise<SimulationAttempt> {
     const id = randomUUID();
-    const [attempt] = await this.db.insert(schema.simulationAttempts).values({ ...insertAttempt, id }).returning();
+    const attempt: SimulationAttempt = {
+      ...insertAttempt,
+      id,
+      completedAt: new Date(),
+    };
+    
+    const userAttempts = this.simulationAttempts.get(insertAttempt.userId) || [];
+    userAttempts.push(attempt);
+    this.simulationAttempts.set(insertAttempt.userId, userAttempts);
+    
     return attempt;
   }
 
   async getAllScamReports(): Promise<ScamReport[]> {
-    return await this.db.select().from(schema.scamReports)
-      .orderBy(desc(schema.scamReports.reportedAt));
+    return [...this.scamReports].sort((a, b) => b.reportedAt.getTime() - a.reportedAt.getTime());
   }
 
   async getVerifiedScamReports(): Promise<ScamReport[]> {
-    return await this.db.select().from(schema.scamReports)
-      .where(eq(schema.scamReports.isVerified, true))
-      .orderBy(desc(schema.scamReports.reportedAt));
+    return this.scamReports
+      .filter(r => r.isVerified)
+      .sort((a, b) => b.reportedAt.getTime() - a.reportedAt.getTime());
   }
 
   async createScamReport(insertReport: InsertScamReport): Promise<ScamReport> {
     const id = randomUUID();
-    const [report] = await this.db.insert(schema.scamReports).values({ ...insertReport, id }).returning();
+    const report: ScamReport = {
+      ...insertReport,
+      phoneNumber: insertReport.phoneNumber ?? null,
+      url: insertReport.url ?? null,
+      amount: insertReport.amount ?? null,
+      id,
+      isVerified: false,
+      upvotes: 0,
+      reportedAt: new Date(),
+    };
+    
+    this.scamReports.push(report);
     return report;
   }
 
   async upvoteScamReport(id: string): Promise<void> {
-    await this.db
-      .update(schema.scamReports)
-      .set({ upvotes: (schema.scamReports.upvotes) })
-      .where(eq(schema.scamReports.id, id));
+    const report = this.scamReports.find(r => r.id === id);
+    if (report) {
+      report.upvotes = (report.upvotes || 0) + 1;
+    }
   }
 
   async getUserChatHistory(userId: string, limit: number = 50): Promise<ChatMessage[]> {
-    return await this.db.select().from(schema.chatMessages)
-      .where(eq(schema.chatMessages.userId, userId))
-      .orderBy(desc(schema.chatMessages.createdAt))
-      .limit(limit);
+    const messages = this.chatMessages.get(userId) || [];
+    return messages
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
     const id = randomUUID();
-    const [message] = await this.db.insert(schema.chatMessages).values({ ...insertMessage, id }).returning();
+    const message: ChatMessage = {
+      ...insertMessage,
+      id,
+      createdAt: new Date(),
+    };
+    
+    const userMessages = this.chatMessages.get(insertMessage.userId) || [];
+    userMessages.push(message);
+    this.chatMessages.set(insertMessage.userId, userMessages);
+    
     return message;
   }
 }
 
-export const storage = new DbStorage();
+export const storage = new MemStorage();
