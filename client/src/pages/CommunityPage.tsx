@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 export default function CommunityPage() {
   const [, setLocation] = useLocation();
-  const { language, username, displayName } = useApp();
+  const { language, speak } = useApp();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -117,11 +117,8 @@ export default function CommunityPage() {
     e.preventDefault();
     if (!formData.scamType || !formData.description) return;
     
-    const { username, displayName } = useApp();
     createReportMutation.mutate({
-      ...formData,
-      username,
-      displayName
+      ...formData
     });
   };
 
