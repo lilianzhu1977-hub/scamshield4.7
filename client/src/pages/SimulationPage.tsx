@@ -1,25 +1,40 @@
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, Phone, PhoneOff, MessageSquare, CheckCircle, XCircle, Volume2, Shuffle } from "lucide-react";
+import { ChevronLeft, Phone, MessageSquare, CheckCircle, XCircle, Shuffle, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useApp } from "@/contexts/AppContext";
-import { getRandomScenario, simulationScenarios } from "@shared/data/simulations";
+import { getRandomScenario, simulationScenarios, type SimulationMessage } from "@shared/data/simulations";
+
+interface StoryNode {
+  message: SimulationMessage;
+  nextNodes?: Record<number, StoryNode>;
+  isEnding?: boolean;
+}
 
 export default function SimulationPage() {
   const [, setLocation] = useLocation();
   const { language } = useApp();
   const [practiceMode, setPracticeMode] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(simulationScenarios[0]);
-  const [answered, setAnswered] = useState(false);
-  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const [showFeedback, setShowFeedback] = useState(false);
   const [isRinging, setIsRinging] = useState(false);
+  const [storyPath, setStoryPath] = useState<SimulationMessage[]>([]);
+  const [currentNodeIndex, setCurrentNodeIndex] = useState(0);
+  const [hasEnded, setHasEnded] = useState(false);
+  const [finalOutcome, setFinalOutcome] = useState<'success' | 'failure' | null>(null);
 
   useEffect(() => {
-    if (currentScenario.messages[language][0].type === 'call') {
+    // Initialize the story with the first message
+    const firstMessage = currentScenario.messages[language][0];
+    setStoryPath([firstMessage]);
+    setCurrentNodeIndex(0);
+    setHasEnded(false);
+    setFinalOutcome(null);
+    
+    if (firstMessage.type === 'call') {
       setIsRinging(true);
       const timer = setTimeout(() => setIsRinging(false), 3000);
       return () => clearTimeout(timer);
@@ -27,19 +42,51 @@ export default function SimulationPage() {
   }, [currentScenario, language]);
 
   const handleChoice = (index: number) => {
-    if (answered) return;
-
-    const message = currentScenario.messages[language][0];
-    const choice = message.choices![index];
-
-    setSelectedChoice(index);
-    setAnswered(true);
-    setShowFeedback(true);
+    const currentMessage = storyPath[currentNodeIndex];
+    const choice = currentMessage.choices![index];
 
     setScore(prev => ({
       correct: prev.correct + (choice.isCorrect ? 1 : 0),
       total: prev.total + 1
     }));
+
+    // Create a feedback message
+    const feedbackMessage: SimulationMessage = {
+      type: 'system',
+      sender: language === 'zh' ? '系统' : language === 'ms' ? 'Sistem' : 'System',
+      content: choice.feedback,
+      choices: choice.isCorrect ? [
+        {
+          text: language === 'zh' ? '继续保持警惕' : language === 'ms' ? 'Teruskan berhati-hati' : 'Stay vigilant',
+          isCorrect: true,
+          feedback: currentScenario.successMessage[language]
+        }
+      ] : [
+        {
+          text: language === 'zh' ? '我明白了，重新尝试' : language === 'ms' ? 'Saya faham, cuba lagi' : 'I understand, try again',
+          isCorrect: false,
+          feedback: currentScenario.failureMessage[language]
+        }
+      ]
+    };
+
+    // Add the feedback to the story path
+    setStoryPath(prev => [...prev, feedbackMessage]);
+    setCurrentNodeIndex(prev => prev + 1);
+
+    // Check if this is the final choice
+    if (choice.isCorrect || currentNodeIndex >= 2) {
+      setHasEnded(true);
+      setFinalOutcome(choice.isCorrect ? 'success' : 'failure');
+    }
+  };
+
+  const handleContinue = () => {
+    if (hasEnded) {
+      handleNext();
+    } else {
+      setCurrentNodeIndex(prev => prev + 1);
+    }
   };
 
   const handleNext = () => {
@@ -51,14 +98,12 @@ export default function SimulationPage() {
         setCurrentScenario(simulationScenarios[currentIndex + 1]);
       }
     }
-    setAnswered(false);
-    setSelectedChoice(null);
-    setShowFeedback(false);
   };
 
-  const message = currentScenario.messages[language][0];
-  const isCall = message.type === 'call';
-  const isWhatsApp = message.type === 'whatsapp';
+  const currentMessage = storyPath[currentNodeIndex];
+  const isCall = currentMessage?.type === 'call';
+  const isWhatsApp = currentMessage?.type === 'whatsapp';
+  const isSystem = currentMessage?.type === 'system';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background px-4 py-8">
@@ -70,6 +115,12 @@ export default function SimulationPage() {
           </Button>
 
           <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {language === 'zh' ? `步骤 ${currentNodeIndex + 1}/${storyPath.length}` :
+               language === 'ms' ? `Langkah ${currentNodeIndex + 1}/${storyPath.length}` :
+               `Step ${currentNodeIndex + 1}/${storyPath.length}`}
+            </Badge>
+
             <Badge variant={practiceMode ? "default" : "outline"} className="text-lg px-4 py-2">
               {language === 'zh' ? `得分: ${score.correct}/${score.total}` :
                language === 'ms' ? `Skor: ${score.correct}/${score.total}` :
@@ -102,6 +153,20 @@ export default function SimulationPage() {
           </Badge>
         </div>
 
+        {/* Story Progress Indicator */}
+        <div className="max-w-md mx-auto mb-6">
+          <div className="flex items-center justify-center gap-2">
+            {storyPath.map((_, idx) => (
+              <div key={idx} className="flex items-center">
+                <div className={`w-3 h-3 rounded-full ${idx <= currentNodeIndex ? 'bg-primary' : 'bg-muted'}`} />
+                {idx < storyPath.length - 1 && (
+                  <div className={`w-8 h-0.5 ${idx < currentNodeIndex ? 'bg-primary' : 'bg-muted'}`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Realistic Phone UI */}
         <div className="max-w-md mx-auto">
           <div className={`relative bg-gray-900 rounded-[3rem] p-4 shadow-2xl transition-all duration-300 ${isRinging ? 'animate-bounce' : ''}`}>
@@ -132,15 +197,15 @@ export default function SimulationPage() {
                       <Phone className="w-12 h-12" />
                     </div>
 
-                    <h2 className="text-3xl font-bold mb-2">{message.sender}</h2>
-                    <p className="text-blue-100 mb-2">{message.callerId}</p>
-                    <p className="text-sm text-blue-200 animate-pulse">
+                    <h2 className="text-3xl font-bold mb-2">{currentMessage.sender}</h2>
+                    <p className="text-blue-100 mb-2">{currentMessage.callerId}</p>
+                    <p className="text-sm text-blue-200 animate-pulse mb-6">
                       {isRinging ? (language === 'zh' ? '来电中...' : language === 'ms' ? 'Panggilan masuk...' : 'Incoming call...') : 
                                    (language === 'zh' ? '通话中...' : language === 'ms' ? 'Dalam panggilan...' : 'On call...')}
                     </p>
 
                     <Card className="mt-8 p-4 bg-white/10 backdrop-blur-md border-white/20">
-                      <p className="text-white text-sm leading-relaxed">"{message.content}"</p>
+                      <p className="text-white text-sm leading-relaxed">"{currentMessage.content}"</p>
                     </Card>
                   </div>
                 </div>
@@ -154,46 +219,67 @@ export default function SimulationPage() {
                       👤
                     </div>
                     <div>
-                      <div className="font-semibold">{message.sender}</div>
+                      <div className="font-semibold">{currentMessage.sender}</div>
                       <div className="text-xs text-green-200">online</div>
                     </div>
                   </div>
 
                   <div className="flex justify-end mb-4">
                     <div className="max-w-[80%] bg-[#DCF8C6] rounded-lg rounded-tr-none p-3 shadow-sm">
-                      <p className="text-sm">{message.content}</p>
-                      <div className="text-xs text-gray-500 mt-1 text-right">{message.timestamp}</div>
+                      <p className="text-sm">{currentMessage.content}</p>
+                      <div className="text-xs text-gray-500 mt-1 text-right">{currentMessage.timestamp}</div>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* SMS Screen */}
-              {message.type === 'sms' && (
-                <div className="p-6">
+              {currentMessage?.type === 'sms' && (
+                <div className="p-6 min-h-[600px]">
                   <div className="flex items-center gap-3 mb-6 pb-4 border-b">
                     <MessageSquare className="w-8 h-8 text-blue-500" />
                     <div>
-                      <div className="font-semibold">{message.sender}</div>
-                      <div className="text-xs text-muted-foreground">{message.timestamp || 'Just now'}</div>
+                      <div className="font-semibold">{currentMessage.sender}</div>
+                      <div className="text-xs text-muted-foreground">{currentMessage.timestamp || 'Just now'}</div>
                     </div>
                   </div>
 
                   <Card className="p-4 bg-blue-50 border-blue-200">
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    <p className="text-sm leading-relaxed">{currentMessage.content}</p>
                   </Card>
                 </div>
               )}
 
+              {/* System Feedback Screen */}
+              {isSystem && (
+                <div className={`p-6 min-h-[600px] ${finalOutcome === 'success' ? 'bg-green-50' : 'bg-amber-50'}`}>
+                  <div className="flex flex-col items-center justify-center h-full">
+                    {finalOutcome === 'success' ? (
+                      <CheckCircle className="w-20 h-20 text-green-600 mb-4" />
+                    ) : (
+                      <XCircle className="w-20 h-20 text-amber-600 mb-4" />
+                    )}
+                    <h3 className="text-2xl font-bold mb-4 text-center">
+                      {finalOutcome === 'success' 
+                        ? (language === 'zh' ? '做得好！' : language === 'ms' ? 'Bagus!' : 'Well Done!')
+                        : (language === 'zh' ? '学习时刻' : language === 'ms' ? 'Masa Belajar' : 'Learning Moment')}
+                    </h3>
+                    <Card className="p-6 max-w-md">
+                      <p className="text-lg leading-relaxed text-center">{currentMessage.content}</p>
+                    </Card>
+                  </div>
+                </div>
+              )}
+
               {/* Choices */}
-              {!answered && message.choices && (
+              {currentMessage?.choices && !hasEnded && (
                 <div className="p-6 space-y-3 bg-white">
-                  <p className="font-semibold text-center mb-4">
+                  <p className="font-semibold text-center mb-4 text-lg">
                     {language === 'zh' ? '你会怎么做？' : 
                      language === 'ms' ? 'Apa yang anda akan buat?' : 
                      'What will you do?'}
                   </p>
-                  {message.choices.map((choice, index) => (
+                  {currentMessage.choices.map((choice, index) => (
                     <Button
                       key={index}
                       onClick={() => handleChoice(index)}
@@ -201,48 +287,22 @@ export default function SimulationPage() {
                       className="w-full justify-start text-left h-auto py-4 hover:bg-primary hover:text-primary-foreground transition-all"
                       size="lg"
                     >
+                      <span className="mr-3 text-lg">{'ABCD'[index]}.</span>
                       {choice.text}
                     </Button>
                   ))}
                 </div>
               )}
 
-              {/* Feedback */}
-              {showFeedback && selectedChoice !== null && (
-                <div className={`p-6 animate-in slide-in-from-bottom-4 ${
-                  message.choices![selectedChoice].isCorrect 
-                    ? 'bg-green-50 border-t-4 border-green-500' 
-                    : 'bg-red-50 border-t-4 border-red-500'
-                }`}>
-                  <div className="flex items-start gap-3">
-                    {message.choices![selectedChoice].isCorrect ? (
-                      <CheckCircle className="w-8 h-8 text-green-600 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold mb-2">
-                        {message.choices![selectedChoice].isCorrect
-                          ? (language === 'zh' ? '正确！' : language === 'ms' ? 'Betul!' : 'Correct!')
-                          : (language === 'zh' ? '小心！' : language === 'ms' ? 'Awas!' : 'Be Careful!')}
-                      </h3>
-                      <p className="text-sm mb-4">{message.choices![selectedChoice].feedback}</p>
-
-                      <div className="p-4 bg-white rounded-lg border">
-                        <p className="text-sm font-semibold mb-1">
-                          {message.choices![selectedChoice].isCorrect
-                            ? currentScenario.successMessage[language]
-                            : currentScenario.failureMessage[language]}
-                        </p>
-                      </div>
-
-                      <Button onClick={handleNext} className="w-full mt-4" size="lg">
-                        {language === 'zh' ? '下一个场景' : 
-                         language === 'ms' ? 'Senario Seterusnya' : 
-                         'Next Scenario'}
-                      </Button>
-                    </div>
-                  </div>
+              {/* Continue Button */}
+              {hasEnded && (
+                <div className="p-6 bg-white">
+                  <Button onClick={handleNext} className="w-full" size="lg">
+                    {language === 'zh' ? '下一个场景' : 
+                     language === 'ms' ? 'Senario Seterusnya' : 
+                     'Next Scenario'}
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
                 </div>
               )}
             </div>

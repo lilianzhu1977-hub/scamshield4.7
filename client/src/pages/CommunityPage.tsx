@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 export default function CommunityPage() {
   const [, setLocation] = useLocation();
-  const { language } = useApp();
+  const { language, username, displayName } = useApp();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -116,7 +116,13 @@ export default function CommunityPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.scamType || !formData.description) return;
-    createReportMutation.mutate(formData);
+    
+    const { username, displayName } = useApp();
+    createReportMutation.mutate({
+      ...formData,
+      username,
+      displayName
+    });
   };
 
   const getSeverityColor = (type: string) => {
