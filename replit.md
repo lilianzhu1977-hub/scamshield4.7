@@ -121,3 +121,27 @@ Preferred communication style: Simple, everyday language.
 **Speech Synthesis:**
 - Browser-native Web Speech API (no external dependency)
 - Language-specific voice selection for English, Chinese (zh-CN), and Malay (ms-MY)
+
+## Recent Changes (November 2025)
+
+### Bug Fixes
+- **Fixed Scam Reporting Feature**: Migrated from database-dependent storage to in-memory storage (MemStorage)
+  - Resolved database connection errors that caused scam reporting to lag or fail
+  - Implemented full MemStorage class with all CRUD operations
+  - Fixed upvote functionality to properly increment vote counts
+  - All community features now work smoothly without database dependencies
+
+### GitHub Integration
+
+**Repository**: `https://github.com/lilianzhu1977-hub/scamshield4.7`
+
+**Important Note**: Replit manages Git operations automatically for safety. To sync your changes with GitHub:
+
+1. **Use Replit's Git UI**: Click the "Version Control" panel in the left sidebar (or use the Git icon)
+2. **Stage Changes**: Review your changes and stage the files you want to commit
+3. **Commit**: Write a commit message describing your changes
+4. **Push**: Click "Push" to sync with your GitHub repository
+
+**Do NOT use manual Git commands** - Replit's safety system prevents direct command-line Git operations to protect your repository from accidental issues.
+
+**GitHub Integration Option**: You can also set up the GitHub connector integration through Replit's integrations panel for enhanced features, though it's optional since Git is already configured.
